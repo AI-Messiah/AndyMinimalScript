@@ -31,7 +31,7 @@ class Process
 public:
 	Process();
 	void Preptext(std::string text);
-	void varscan(std::string text);
+	void convert(std::string text);
 	std::map<std::string, lineType> match;
 	TreeMaker maker;
 private:

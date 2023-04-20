@@ -310,7 +310,7 @@ OpNode TreeMaker::createTree(std::string text)
 						if (neg1) num1 *= -1;
 						if (neg2) num2 *= -1;
 						if (hasnum1 && hasnum2) {
-							std::string rep = calculate(num1, num2, curtok);
+							std::string rep = fromNum(calc.Calculate(num1, num2, curtok));
 							text = meth.RepText(text, rep, frm, to + 1);
 							goto resetlbl1;
 						}
@@ -490,7 +490,7 @@ OpNode TreeMaker::createTree(std::string text)
 				if (neg1) num1 *= -1;
 				if (neg2) num2 *= -1;
 				if (hasnum1 && hasnum2) {
-					std::string rep = calculate(num1, num2, curtok);
+					std::string rep = fromNum(calc.Calculate(num1, num2, curtok));
 					text = meth.RepText(text, rep, frm, cntprt - 1);
 					goto resetlbl1;
 				}
@@ -821,77 +821,6 @@ int TreeMaker::countNodes(std::string text, int index)
     return cnt;
 }
 
-std::string TreeMaker::calculate(double val1, double val2, tokenName token)
-{
-	double result = 0;
-	bool trl = val1 != 0;
-	bool trr = val2 != 0;
-	try {
-		switch (token) {
-
-		case opExponent:
-			result = pow(val1, val2);
-			break;
-		case opMultiply:
-			result = val1 * val2;
-			break;
-		case opDivide:
-			result = val1 / val2;
-			break;
-		case opModular:
-			result = fmod(val1, val2);
-			break;
-		case opAdd:
-			result = val1 + val2;
-			break;
-		case opSubtract:
-			result = val1 - val2;
-			break;
-		case opBitAnd:
-			result = long(val1) & long(val2);
-			break;
-		case opBitOr:
-			result = long(val1) | long(val2);
-			break;
-		case opGreat:
-			result = val1 > val2;
-			break;
-		case opLess:
-			result = val1 < val2;
-			break;
-		case opEqual:
-			result = val1 == val2;
-			break;
-		case opNotEqual:
-			result = val1 != val2;
-			break;
-		case opGreatEqual:
-			result = val1 >= val2;
-			break;
-		case opLessEqual:
-			result = val1 <= val2;
-			break;
-		case opInvert:
-			result = val1 == 0;
-			break;
-		case opAnd:
-			result = (trl && trr) ? 1 : 0;
-			break;
-		case opOr:
-			result = (trl || trr) ? 1 : 0;
-			break;
-		}
-
-		std::stringstream stream;
-		stream << std::fixed << std::setprecision(15) << result;
-		return stream.str();
-	}
-	catch (_exception e) {
-		//report error
-		return "0";
-	}
-	return "0";
-}
 
 bool TreeMaker::hasPeren(std::string text)
 {

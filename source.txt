@@ -1,0 +1,9 @@
+def av = 0
+while(av < 10){
+if(av \ 2 == 0){
+	print(av)
+}else{
+	print(av + 9)
+}
+av += 1
+}

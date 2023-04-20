@@ -26,10 +26,27 @@ void Process::Preptext(std::string text)
 			retcnt = 0;
 		}
 	}
-	varscan(result);
+	int pcnt = 0;
+	bool hasret = false;
+	bool closdet = false;
+	while (pcnt < result.length()) {
+		pic = result.substr(pcnt, 1);
+		if (pic == "{" && !hasret) {
+			result = meth.insertRet(result, pcnt);
+			pcnt++;
+		}
+		hasret = (pic == "\n");
+		if (closdet && !hasret) {
+			result = meth.insertRet(result, pcnt);
+			
+		}
+		closdet = (pic == "}");
+		pcnt++;
+	}
+	convert(result);
 }
 
-void Process::varscan(std::string text)
+void Process::convert(std::string text)
 {
 	int linenum = 0;
 	std::string pic;
@@ -264,7 +281,7 @@ void Process::varscan(std::string text)
 		}
 		
 	}
-	vars.clear();
+	//vars.clear();
 	Run();
 }
 
@@ -286,7 +303,7 @@ void Process::Run()
 			case defLine:
 				hasval = current.line1 < 0;
 				if (current.line1 < 0) current.line1 = 0;
-				vars.Create(current.labname, current.val, hasval, current.line1);
+				//vars.Create(current.labname, current.val, hasval, current.line1);
 				break;
 			case varLine:
 				val = current.op2.evaluate();

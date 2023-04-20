@@ -7,7 +7,7 @@ public:
 	void handleScript(std::string text);
 	void setFunction(std::string name, std::function<double(std::vector<double>)> address);
 	void setErrorHandler(std::function<void(errInfo)> ahan);
-	void debugfunc(std::string text);
+	
 private:
 	Process proc;
 };

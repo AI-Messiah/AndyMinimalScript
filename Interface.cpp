@@ -2,7 +2,8 @@
 
 void Interface::handleScript(std::string text)
 {
-	proc.varscan(text);
+	proc.Preptext(text);
+	//proc.convert(text);
 }
 
 void Interface::setFunction(std::string name, std::function<double(std::vector<double>)> address)
@@ -15,9 +16,6 @@ void Interface::setErrorHandler(std::function<void(errInfo)> ahan)
 	ahand.setHandler(ahan);
 }
 
-void Interface::debugfunc(std::string text)
-{
-	proc.maker.createTree(text);
-}
+
 
 

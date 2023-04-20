@@ -203,6 +203,6 @@ int Variables::getNum(std::string name)
 
 void Variables::clear()
 {
-	refs.clear();
-	vplas.clear();
+	for (int i = 0; i < vplas.size(); i++) vplas.at(i).active = false;
+	
 }

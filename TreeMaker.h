@@ -20,8 +20,7 @@ private:
 	Maps smp;
 	OpNode combvar(OpNode inod, std::string var);
 	OpNode combfun(OpNode inod, int fun, bool internal);
-	int countNodes(std::string text, int index);
-	std::string calculate(double val1, double val2, tokenName token);
+	int countNodes(std::string text, int index);	
 	bool hasPeren(std::string text);
 	std::string fromNum(double val);	
 	bool detComma(std::string text);
