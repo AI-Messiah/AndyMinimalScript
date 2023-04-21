@@ -1,7 +1,4 @@
-# AndyMinimalScript
-Minimal scripting language as simple as posable but will work
-
-		This is mostly finished except for error handling. Not everything has been tested but I was able to make a script that is fully functional. I will make a youtube video of it when it is complete.
+	This is mostly finished except for error handling. Not everything has been tested but I was able to make a script that is fully functional. I will make a youtube video of it when it is complete.
 
 	Unlike a lot of things I have seen this has instructions for it and I will document how it works.
 
@@ -10,8 +7,8 @@ Minimal scripting language as simple as posable but will work
 	This is a simple scripting language written by Carle Banning it was created in an unconventional way yet it is amazingly simple. Instead of using a lexer and a parser it constructs the abstract syntax tree from extracting the arguments using string methods and placing a character in the string to represent that a node has been created and joining the nodes together. The tree is created from the bottom up and the trees evaluate themselves, when they are needed. The lines are represented by a type of struct that contains its type, 2 trees and their relation to each other and where to go next on a condition or automatically.
 	It only has one data type (number the equivalent of double) which supports arrays and only has the required reserved words. All values except 0 are treated as true and boolean operations return 0 for false and 1 for true. It has no support for creating your own internal functions.
 
-	I thought I would include a main file and a script. These are easy to delete when you use this yourself.
-	
+I thought I would include a main file and a script. These are easy to delete when you use this yourself.
+
 These are it's reserved words.
 
 *def – necessary for variable creation. Variables are only assigned by numbers once created.
@@ -76,8 +73,7 @@ External functions can have zero or more than one argument. These are seperated 
 
 To use this language you need C++ version 20
 
-include the file Interface.h and create an instance of the Interface class. To set an error handler you create a method for it that takes an errInfo and returns void and pass the address to setErrorHandler. To create an external function you create a function which takes a vector of double and returns a double and pass its internal name and it's address to setFunction.
+include the file Interface.h and create an instance of the Interface class. To set an error handler you create a method for it that takes a vector of errInfo and returns void and pass the address to setErrorHandler. To create an external function you create a function which takes a vector of double and returns a double and pass its internal name and it's address to setFunction.
 
 To run the script pass it as a string to handleScript.   
-
 
