@@ -80,7 +80,7 @@ double Calculator::Calculate(double val1, double val2, tokenName token)
 		return result;
 	}
 	catch (_exception e) {
-		//report error
+		ahand.report(0);
 		return 0;
 	}
 	return 0;

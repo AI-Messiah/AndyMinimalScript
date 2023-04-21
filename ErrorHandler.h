@@ -11,11 +11,16 @@ struct errInfo {
 class ErrorHandler
 {
 public:
-	void setHandler(std::function<void(errInfo)> ahan);
+	void setHandler(std::function<void(std::vector<errInfo>)> ahan);
 	void report(int errNum);
+	void sendErrors();
 	bool beenReported = false;
 	int curline = 0;
 	std::string line;
-	std::function<void(errInfo)> handler;
+	bool reponce = false;
+private:
+	std::string getMessage(int err);
+	std::vector<errInfo> errors;
+	std::function<void(std::vector<errInfo>)> handler;
 };
 

@@ -19,6 +19,12 @@ double printm(vector<double> inp) {
 	return 0;
 }
 
+void errhand(std::vector<errInfo> errors) {
+	for (int i = 0; i < errors.size(); i++) {
+		cout << errors.at(i).lineText << " " << errors.at(i).errType << " " << errors.at(i).errMes << "\n";
+	}
+}
+
 int main(){
 	ifstream in("source.txt");
 	string text;
@@ -27,6 +33,7 @@ int main(){
 		text += line + "\n";
 	}
 	Interface inter;
+	inter.setErrorHandler(&errhand);
 	inter.setFunction("print", &printm);
 	//inter.debugfunc("print(12)");
 	inter.handleScript(text);

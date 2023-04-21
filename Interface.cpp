@@ -11,7 +11,7 @@ void Interface::setFunction(std::string name, std::function<double(std::vector<d
 	trans.setFunction(name, address);
 }
 
-void Interface::setErrorHandler(std::function<void(errInfo)> ahan)
+void Interface::setErrorHandler(std::function<void(std::vector<errInfo>)> ahan)
 {
 	ahand.setHandler(ahan);
 }

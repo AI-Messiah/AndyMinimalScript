@@ -1,5 +1,4 @@
 #pragma once
-
 #include <string>
 #include <vector>
 #include <random>
@@ -7,6 +6,8 @@
 #include <stdint.h>
 #include <cmath>
 #include <functional>
+#include "Variables.h"
+
 class Transit
 {
 public:

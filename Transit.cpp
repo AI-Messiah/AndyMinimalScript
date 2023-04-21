@@ -83,7 +83,7 @@ double Transit::calFun(int funval, double pasval){
 		return result;
 	}
 	catch (_exception e) {
-		
+		ahand.report(0);
 	}
 	return 0;
 }

@@ -192,17 +192,10 @@ bool Variables::isArray(int num)
 	return false;
 }
 
-int Variables::getNum(std::string name)
-{
-	if (refs.contains(name)) {
-		return refs[name];
-	}
-	//report error
-	return -1;
-}
 
 void Variables::clear()
 {
-	for (int i = 0; i < vplas.size(); i++) vplas.at(i).active = false;
-	
+	//for (int i = 0; i < vplas.size(); i++) vplas.at(i).active = false;
+	vplas.clear();
+	refs.clear();
 }

@@ -43,5 +43,6 @@ private:
 	Maps amap;
 	strmeth meth;
 	std::vector<Line> lines;
+	std::vector<std::string> textlines;
 };
 

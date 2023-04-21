@@ -39,7 +39,7 @@ public:
 	double Get(int num, int par);
 	aval SetGet(int num, int par);
 	bool isArray(int num);
-	int getNum(std::string name);
+	
 	void clear();
 private:
 	int cscope = 0;
