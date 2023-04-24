@@ -49,6 +49,8 @@ The internal functions are
 *distrand – Distributed random number, takes no arguments.
 *secrand – Hardware generated random number, takes no arguments.
 
+This file contains characters that have been mistaken for formatting.
+
 The order of operations are.
 () - parentheses.
 ^ - exponents.
