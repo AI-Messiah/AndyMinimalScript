@@ -36,6 +36,24 @@ std::string ErrorHandler::getMessage(int err)
 		return "Could not find end of block.";
 	case 2:
 		return "Could not find if block.";
+	case 3:
+		return "Expected arguments.";
+	case 4:
+		return "Uneven parenthesis.";
+	case 5:
+		return "Unexpected tokens.";
+	case 6:
+		return "Missing a value type.";
+	case 7:
+		return "Variable not defined.";
+	case 8:
+		return "Variable out of scope.";
+	case 9:
+		return "Variable already defined.";
+	case 10:
+		return "Array out of bounds.";
+	case 11:
+		return "Invalid variable reference.";
 	}
 	return "Unknown error";
 }

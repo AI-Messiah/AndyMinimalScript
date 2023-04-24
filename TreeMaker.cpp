@@ -5,7 +5,7 @@ OpNode TreeMaker::createTree(std::string text)
     std::vector<OpNode> nodes;
 	OpNode temp;
 	if (text == "") {
-		//report error
+		ahand.report(3);
 		return temp;
 	}
 	double num1;
@@ -30,7 +30,9 @@ OpNode TreeMaker::createTree(std::string text)
 	int cntprt;
 	std::string pic;
 	int ipic;
-	int frm, frm1, to;
+	int frm, frm1, frm2, to;
+	frm = -1;
+	frm2 = -1;
 	int npl;
 	bool incon;
 	tokenName curtok;
@@ -38,7 +40,17 @@ OpNode TreeMaker::createTree(std::string text)
 	bool fexpr;
 	int fundet;
 	int nodepl1, nodepl2;
-	valType vtype1, vtype2;	
+	valType vtype1, vtype2;
+	int parcnt = 0;
+	for (int i = 0; i < text.length(); i++) {
+		if (text.substr(i, 1) == "(") parcnt++;
+		if (text.substr(i, 1) == ")") parcnt--;
+	}
+	if (parcnt != 0) {
+		ahand.report(4);
+		return temp;
+	}
+	
 	while (hasPeren(text)) {
 	resetlbl:
 		fundet = -1;
@@ -47,9 +59,12 @@ OpNode TreeMaker::createTree(std::string text)
 		incon = false;
 		var1 = "";
 		cntch = true;
-		while (cntprt < text.length() && text.substr(cntprt, 1) != ")") {
+		parcnt = 0;
+		while (cntprt < text.length() && !(text.substr(cntprt, 1) == ")" && parcnt == 1)) {
+			if (text.substr(cntprt, 1) == ")") parcnt--;
 			if (text.substr(cntprt, 1) == "(") {
-				frm = cntprt;
+				parcnt++;
+				if (frm2 < 0) frm2 = cntprt;
 				cntch = false;
 			}
 			pic = text.substr(cntprt, 1);
@@ -59,6 +74,7 @@ OpNode TreeMaker::createTree(std::string text)
 				if (cntch) {
 					var1 = "";
 					fundet = -1;
+					frm = -1;
 				}
 			}
 			else if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
@@ -73,11 +89,12 @@ OpNode TreeMaker::createTree(std::string text)
 						fundet = i + 16;
 						break;
 					}
+					if (frm < 0) frm = cntprt;
 				}
 			}
 			cntprt++;
 		}                                                                    
-		temp = createTree(text.substr(frm + 1, cntprt - frm - 1));
+		temp = createTree(text.substr(frm2 + 1, cntprt - frm2 - 1));
 		if (fundet > 15) {			
 			temp = combfun(temp, fundet - 16, false);
 			text = meth.emplace(text, frm, cntprt);
@@ -125,7 +142,7 @@ OpNode TreeMaker::createTree(std::string text)
 					else {
 						temp.Src.at(0) = valIndexed;
 					}
-					text = meth.emplace(text, frm, cntprt);
+					text = meth.emplace(text, frm, cntprt + 1);
 					npl = countNodes(text, frm);
 					nodes.insert(nodes.begin() + npl, temp);
 				}
@@ -315,6 +332,8 @@ OpNode TreeMaker::createTree(std::string text)
 							goto resetlbl1;
 						}
 						else if (sid == 1){
+							vtype1 = typeNone;
+							vtype2 = typeNone;
 							if (hasnum1) {
 								vtype1 = typeNum;
 							}
@@ -350,93 +369,97 @@ OpNode TreeMaker::createTree(std::string text)
 							else {
 								//report error
 							}
-
-							nodref = countNodes(text, cntprt);
-							switch (vtype1) {
-							case typeNum:
-								switch (vtype2) {
-								case typeVar:
-									temp = numwithvar(num1, var2, curtok);
-									nodes.insert(nodes.begin() + nodref, temp);
-									break;
-								case typeFunc:
-									temp = numwithfunc(num1, nodes.at(nodref), curtok);
-									nodes.at(nodref) = temp;
-									break;
-								case typeNode:
-									temp = numwithnode(num1, nodes.at(nodref), curtok);
-									nodes.at(nodref) = temp;
-									break;
-								}
-								break;
-							case typeVar:
-								switch (vtype2) {
+							if (vtype1 != typeNone && vtype2 != typeNone) {
+								nodref = countNodes(text, cntprt);
+								switch (vtype1) {
 								case typeNum:
-									temp = varwithnum(var1, num2, curtok);
-									nodes.insert(nodes.begin() + nodref, temp);
+									switch (vtype2) {
+									case typeVar:
+										temp = numwithvar(num1, var2, curtok);
+										nodes.insert(nodes.begin() + nodref, temp);
+										break;
+									case typeFunc:
+										temp = numwithfunc(num1, nodes.at(nodref), curtok);
+										nodes.at(nodref) = temp;
+										break;
+									case typeNode:
+										temp = numwithnode(num1, nodes.at(nodref), curtok);
+										nodes.at(nodref) = temp;
+										break;
+									}
 									break;
 								case typeVar:
-									temp = varwithvar(var1, var2, curtok);
-									nodes.insert(nodes.begin() + nodref, temp);
+									switch (vtype2) {
+									case typeNum:
+										temp = varwithnum(var1, num2, curtok);
+										nodes.insert(nodes.begin() + nodref, temp);
+										break;
+									case typeVar:
+										temp = varwithvar(var1, var2, curtok);
+										nodes.insert(nodes.begin() + nodref, temp);
+										break;
+									case typeFunc:
+										temp = varwithfunc(var1, nodes.at(nodref), curtok);
+										nodes.at(nodref) = temp;
+										break;
+									case typeNode:
+										temp = varwithnode(var1, nodes.at(nodref), curtok);
+										nodes.at(nodref) = temp;
+										break;
+									}
 									break;
 								case typeFunc:
-									temp = varwithfunc(var1, nodes.at(nodref), curtok);
-									nodes.at(nodref) = temp;
+									switch (vtype2) {
+									case typeNum:
+										temp = funcwithval(nodes.at(nodref), num2, curtok);
+										nodes.at(nodref) = temp;
+										break;
+									case typeVar:
+										temp = funcwithvar(nodes.at(nodref), var2, curtok);
+										nodes.at(nodref) = temp;
+										break;
+									case typeFunc:
+										temp = funcwithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
+										nodes.at(nodref - 1) = temp;
+										nodes.erase(nodes.begin() + nodref);
+										break;
+									case typeNode:
+										temp = funcwithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
+										nodes.at(nodref - 1) = temp;
+										nodes.erase(nodes.begin() + nodref);
+										break;
+									}
 									break;
 								case typeNode:
-									temp = varwithnode(var1, nodes.at(nodref), curtok);
-									nodes.at(nodref) = temp;
+									switch (vtype2) {
+									case typeNum:
+										temp = nodewithnum(nodes.at(nodref), num2, curtok);
+										nodes.at(nodref) = temp;
+										//to = cntprt + 2;
+										break;
+									case typeVar:
+										temp = nodewithvar(nodes.at(nodref), var2, curtok);
+										nodes.at(nodref) = temp;
+										break;
+									case typeFunc:
+										temp = nodewithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
+										nodes.at(nodref - 1) = temp;
+										nodes.erase(nodes.begin() + nodref);
+										break;
+									case typeNode:
+										temp = nodewithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
+										nodes.at(nodref - 1) = temp;
+										nodes.erase(nodes.begin() + nodref);
+										break;
+									}
 									break;
 								}
-								break;
-							case typeFunc:
-								switch (vtype2) {
-								case typeNum:
-									temp = funcwithval(nodes.at(nodref), num2, curtok);
-									nodes.at(nodref) = temp;
-									break;
-								case typeVar:
-									temp = funcwithvar(nodes.at(nodref), var2, curtok);
-									nodes.at(nodref) = temp;
-									break;
-								case typeFunc:
-									temp = funcwithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-									nodes.at(nodref - 1) = temp;
-									nodes.erase(nodes.begin() + nodref);
-									break;
-								case typeNode:
-									temp = funcwithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-									nodes.at(nodref - 1) = temp;
-									nodes.erase(nodes.begin() + nodref);
-									break;
-								}
-								break;
-							case typeNode:
-								switch (vtype2) {
-								case typeNum:
-									temp = nodewithnum(nodes.at(nodref), num2, curtok);
-									nodes.at(nodref) = temp;
-									//to = cntprt + 2;
-									break;
-								case typeVar:
-									temp = nodewithvar(nodes.at(nodref), var2, curtok);
-									nodes.at(nodref) = temp;
-									break;
-								case typeFunc:
-									temp = nodewithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-									nodes.at(nodref - 1) = temp;
-									nodes.erase(nodes.begin() + nodref);
-									break;
-								case typeNode:
-									temp = nodewithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-									nodes.at(nodref - 1) = temp;
-									nodes.erase(nodes.begin() + nodref);
-									break;
-								}
-								break;
+								text = meth.emplace(text, frm, to + 1);
+								goto resetlbl1;
 							}
-							text = meth.emplace(text, frm, to + 1);
-							goto resetlbl1;
+							else {
+								return temp;
+							}
 						}
 					}
 					else {
@@ -495,6 +518,8 @@ OpNode TreeMaker::createTree(std::string text)
 					goto resetlbl1;
 				}
 				else if (sid == 1){
+					vtype1 = typeNone;
+					vtype2 = typeNone;
 					if (hasnum1) {
 						vtype1 = typeNum;
 					}
@@ -510,7 +535,7 @@ OpNode TreeMaker::createTree(std::string text)
 						}
 					}
 					else {
-						//report error
+						ahand.report(6);
 					}
 
 					if (hasnum2) {
@@ -528,7 +553,7 @@ OpNode TreeMaker::createTree(std::string text)
 						}
 					}
 					else {
-						//report error
+						ahand.report(6);
 					}
 
 					nodref = countNodes(text, cntprt);
@@ -595,8 +620,7 @@ OpNode TreeMaker::createTree(std::string text)
 						switch (vtype2) {
 						case typeNum:
 							temp = nodewithnum(nodes.at(nodref), num2, curtok);
-							nodes.at(nodref) = temp;
-							//to = cntprt + 2;
+							nodes.at(nodref) = temp;							
 							break;
 						case typeVar:
 							temp = nodewithvar(nodes.at(nodref), var2, curtok);
@@ -645,6 +669,15 @@ OpNode TreeMaker::createTree(std::string text)
 	frm1 = -1;
 	temp.clear();
 	OpNode ret;
+	bool accepted = false;
+	for (int i = 0; i < text.length(); i++) {
+		for (int j = 0; j < acChars.length(); j++) {
+			if (text.substr(i, 1) == acChars.substr(j, 1)) accepted = true;
+		}
+	}
+	if (!accepted) {
+		ahand.report(5);
+	}
 	if (detComma(text)) {
 		OpNode tpart;
 		
@@ -738,6 +771,7 @@ OpNode TreeMaker::createTree(std::string text)
 		}
 		return ret;
 	}else{
+		
 		for (int i = 0; i < text.length(); i++) {
 			pic = text.substr(i, 1);
 			ipic = meth.asc(pic);

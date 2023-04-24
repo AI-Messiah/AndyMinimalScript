@@ -8,10 +8,11 @@ int Variables::getRef(std::string name)
 	if (refs.contains(name)) {
 		int idx = refs[name];
 		if (!vplas.at(idx).active) {
-			//report error
+			ahand.report(8);
 		}
 		return idx;
 	}else {
+		ahand.report(7);
 		return 0;
 	}
 	
@@ -40,7 +41,7 @@ void Variables::Create(std::string name, long double val, bool hasval, int pars)
 	}else{
 		int anidx = refs[name];
 		if (vplas.at(anidx).active) {
-			//report error(5);
+			ahand.report(9);
 		}else{
 			varref nref;
 			nref.active = true;
@@ -60,11 +61,6 @@ void Variables::Create(std::string name, long double val, bool hasval, int pars)
 	}
 }
 
-bool Variables::exists(std::string name)
-{
-	return refs.contains(name);
-}
-
 void Variables::IncScope()
 {
 	cscope++;
@@ -75,10 +71,9 @@ void Variables::DecScope()
 	if (cscope > 0) cscope--;
 	int clen = vplas.size();
 	for (int i = 0; i < clen; i++) if (vplas.at(i).scope > cscope) {
-			vplas.at(i).active = false;
-			vplas.at(i).vals.clear();
-			
-	}	
+		vplas.at(i).active = false;
+		vplas.at(i).vals.clear();			
+	}
 }
 
 void Variables::ResetScope()
@@ -102,30 +97,18 @@ void Variables::Set(int num, long double val, int par)
 				vplas.at(num).vals[par] = vref;
 			}
 			else {
-				//report error(6);
+				ahand.report(10);
 			}
 		}
 		else {
-			//report error(7);
+			ahand.report(8);
 		}
 	}
 	else {
-		//report error(8);
+		ahand.report(11);
 	}
 }
 
-bool Variables::isActive(int num)
-{
-	if (num < vplas.max_size()) {
-		
-		if (vplas.at(num).active) {
-			return true;
-		}
-	}else{
-		//report error(8);
-	}
-	return false;
-}
 
 double Variables::Get(int num, int par)
 {
@@ -163,39 +146,22 @@ aval Variables::SetGet(int num, int par)
 			if (par < vplas.at(num).vals.size() && par >= 0) {
 				ret = vplas.at(num).vals.at(par);
 				return ret;
+			}else{
+				ahand.report(10);
 			}
-			else {
-				//report error(6);
-			}
+		}else{
+			ahand.report(8);
 		}
-		else {
-			//report error(7);
-		}
-	}
-	else {
-		//report error(8);
+	}else{
+		ahand.report(11);
 	}
 	return ret;
 }
 
 
-bool Variables::isArray(int num)
-{
-	if (num < vplas.size()) {
-		
-		if (vplas.at(num).active) {
-			return (vplas.at(num).vals.size() > 1);
-		}
-	}else{
-		//report error(8);
-	}
-	return false;
-}
-
 
 void Variables::clear()
 {
-	//for (int i = 0; i < vplas.size(); i++) vplas.at(i).active = false;
 	vplas.clear();
 	refs.clear();
 }

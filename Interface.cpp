@@ -15,7 +15,3 @@ void Interface::setErrorHandler(std::function<void(std::vector<errInfo>)> ahan)
 {
 	ahand.setHandler(ahan);
 }
-
-
-
-

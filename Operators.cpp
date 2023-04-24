@@ -21,6 +21,7 @@ double OpNode::evaluate()
 	double val2 = 0;
 	double nval1 = 0;
 	double nval2 = 0;
+	
 	for (int i = 0; i < Src.size(); i++) {
 		switch (Src.at(i)) {
 		case valNone:
@@ -91,7 +92,7 @@ double OpNode::evaluate()
 			std::vector<double> pargs;
 			pargs.clear();
 			if (fside == 0) {
-				if (nodes.at(nodcnt).nodes.size() == 0) {
+				if (nodes.at(nodcnt).nodes.size() < 2) {
 					
 					nval1 = nodes.at(nodcnt).evaluate();
 					pargs.push_back(nval1);

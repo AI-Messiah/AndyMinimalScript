@@ -75,6 +75,7 @@ void Process::convert(std::string text)
 	int pcnt = 0;
 	bool cont = true;
 	int lastpos = 0;
+	std::string lastwhole = "";
 	while (pcnt < text.length()) {
 		cont = true;
 		linetext = "";
@@ -85,9 +86,11 @@ void Process::convert(std::string text)
 		}
 		pcnt++;
 		ahand.line = linetext;
+		ahand.curline = linenum + 1;
 		textlines.push_back(linetext);
 		for (int i = 0; i < linetext.length(); i++) {
 			pic = linetext.substr(i, 1);
+			
 			whole += pic;
 			whocnt++;
 			if (parcnt != 0) insparen += pic;			
@@ -196,7 +199,7 @@ void Process::convert(std::string text)
 				if (cmpprt.length() < 3) {
 					for (int i = 0; i < amap.asdOps.length() / 2; i++) {
 						std::string cmp = amap.asdOps.substr(i * 2, 2);
-						//if (cmp.substr(1, 1) == " ") cmp = cmp.substr(0, 1);
+						if (cmp.substr(1, 1) == " ") cmp = cmp.substr(0, 1);
 						if (cmp == cmpprt && holdWord != defLine) {
 							holdWord = varLine;
 							if (cmp == "=") {
@@ -205,7 +208,8 @@ void Process::convert(std::string text)
 							else {
 								aline.op1 = maker.createTree(whole.substr(0, whocnt - 3));
 							}
-							whole = "";
+							lastwhole = whole;
+							whole = "";							
 							aline.equtype = amap.convertedTokens[cmp];
 						}
 					}
@@ -213,11 +217,13 @@ void Process::convert(std::string text)
 			}
 		}
 		linenum++;
+		
 		switch (holdWord) {
 		case funLine:
 			aline.op1 = maker.createTree(whole.substr(0, whole.length()));
 			break;
 		case varLine:
+			//aline.op1 = maker.createTree(lastwhole.substr(0, lastwhole.length() - 1));
 			aline.op2 = maker.createTree(whole.substr(0, whole.length()));
 			break;
 		case defLine:
@@ -250,6 +256,7 @@ void Process::convert(std::string text)
 		}
 		aline.type = holdWord;
 		lines.push_back(aline);
+		
 		aline = newLine();
 		ldef = false;
 		expdef = "";
@@ -313,7 +320,9 @@ void Process::Run()
 	tokenName tok;
 	bool hasval;
 	while (linenum < lines.size()) {
+		if (ahand.beenReported) return;
 		ahand.line = textlines.at(linenum);
+		ahand.curline = linenum + 1;
 		current = lines.at(linenum);
 		if (current.ifend || current.whilend) {
 			linenum = current.whret;
@@ -333,6 +342,7 @@ void Process::Run()
 				break;
 			case funLine:
 				current.op1.evaluate();
+				
 				break;
 			case ifLine:
 				val = current.op1.evaluate();
@@ -352,7 +362,7 @@ void Process::Run()
 		}
 		if (current.type != gotoLine && !(current.ifend || current.whilend)) linenum++;
 	}
-	int non = 0;
+	
 }
 
 Line Process::newLine()

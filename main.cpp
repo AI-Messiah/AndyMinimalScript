@@ -26,7 +26,7 @@ void errhand(std::vector<errInfo> errors) {
 }
 
 int main(){
-	ifstream in("source.txt");
+	ifstream in("source1.txt");
 	string text;
 	string line;
 	while (getline(in, line)) {
@@ -35,7 +35,6 @@ int main(){
 	Interface inter;
 	inter.setErrorHandler(&errhand);
 	inter.setFunction("print", &printm);
-	//inter.debugfunc("print(12)");
 	inter.handleScript(text);
 	in.close();
 	return 0;

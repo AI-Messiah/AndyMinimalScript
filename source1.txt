@@ -1,0 +1,7 @@
+def idx = 0
+def ar(10)
+while(idx < 10){
+ar(idx) = idx * 2
+print(ar(idx))
+idx += 1
+}

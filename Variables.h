@@ -30,15 +30,15 @@ class Variables
 public:
 	int getRef(std::string name);
 	void Create(std::string name, long double val, bool hasval, int pars);
-	bool exists(std::string name);
+	
 	void IncScope();
 	void DecScope();
 	void ResetScope();
 	void Set(int num, long double val, int par);
-	bool isActive(int num);
+	
 	double Get(int num, int par);
 	aval SetGet(int num, int par);
-	bool isArray(int num);
+	
 	
 	void clear();
 private:

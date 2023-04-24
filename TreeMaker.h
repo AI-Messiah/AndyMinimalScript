@@ -5,6 +5,7 @@
 #include "ascii.h"
 
 enum valType {
+	typeNone,
 	typeNum,
 	typeVar,
 	typeNode,
@@ -16,6 +17,7 @@ class TreeMaker
 public:
 	OpNode createTree(std::string text);
 private:
+	std::string acChars = ",-.0123456789#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 	strmeth meth;
 	Maps smp;
 	OpNode combvar(OpNode inod, std::string var);
