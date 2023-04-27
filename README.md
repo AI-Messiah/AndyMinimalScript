@@ -17,6 +17,7 @@ These are it's reserved words.
 *else
 *goto
 *exit
+*e - for scientific notation
 
 when a variable goes out of scope it's assignments are removed however it's reference is stored. To be able to use it again it must be created again to be used. When it is created again it can be created with a different array size.
 
