@@ -90,7 +90,7 @@ double Transit::calFun(int funval, double pasval){
 
 double Transit::callext(int num, std::vector<double> args)
 {
-	return ops.at(num)(args);
+	return ops.at(num)(args);	
 }
 
 void Transit::setFunction(std::string name, std::function<double(std::vector<double>)> address)

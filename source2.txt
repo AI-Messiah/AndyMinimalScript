@@ -1,0 +1,14 @@
+def vara = 0
+def varb = 0
+def varc
+while(vara < 6)
+{
+varb = 0
+while(varb < 6)
+{
+varc = testfun(vara, varb)
+varb += 1
+print(varc)
+}
+vara += 1
+}

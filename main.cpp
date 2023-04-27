@@ -25,8 +25,18 @@ void errhand(std::vector<errInfo> errors) {
 	}
 }
 
+double testfun(vector<double> inp) {
+	double ret = 1;
+	double chg;
+	for (int i = 0; i < inp.size(); i++) {
+		chg = inp.at(i) + 1.0 / ((double)i + 2.0);
+		ret *= chg;
+	}
+	return ret;
+}
+
 int main(){
-	ifstream in("source1.txt");
+	ifstream in("source2.txt");
 	string text;
 	string line;
 	while (getline(in, line)) {
@@ -35,6 +45,7 @@ int main(){
 	Interface inter;
 	inter.setErrorHandler(&errhand);
 	inter.setFunction("print", &printm);
+	inter.setFunction("testfun", &testfun);	
 	inter.handleScript(text);
 	in.close();
 	return 0;

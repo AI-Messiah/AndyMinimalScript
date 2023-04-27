@@ -15,6 +15,10 @@ enum valFrom {
 	valExternal
 };
 
+struct varinc {
+	int num;
+	bool neg;
+};
 
 class OpNode
 {
@@ -26,14 +30,10 @@ public:
 	void clear();
 	
 	bool assign(tokenName tok, double ival);
-	tokenName oper = opNone;
-	bool empty = false;
-	int  levels = 0;
-	bool left = false;
-	
+	tokenName oper = opNone;		
 	std::vector<valFrom> Src;
 	std::vector<double> Val;
-	std::vector<int> Var;
+	std::vector<varinc> Var;
 	
 	std::vector<OpNode> nodes;
 };

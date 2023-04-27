@@ -2,7 +2,11 @@
 
 int strmeth::asc(std::string inv)
 {
-	return (int)inv.substr(0, 1).c_str()[0];
+	if (inv.length() > 0) {
+		return (int)inv.substr(0, 1).c_str()[0];
+	}else{
+		return 0;
+	}
 }
 
 std::string strmeth::RepText(std::string text, std::string rep, int frm, int to)

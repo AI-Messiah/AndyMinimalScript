@@ -140,6 +140,10 @@ aval Variables::SetGet(int num, int par)
 	aval ret;
 	ret.value = 0;
 	ret.defined = false;
+	if (par < 0) {
+		ahand.report(13);
+		return ret;
+	}
 	if (num < vplas.size()) {
 		
 		if (vplas.at(num).active) {

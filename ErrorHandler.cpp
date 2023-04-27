@@ -54,6 +54,10 @@ std::string ErrorHandler::getMessage(int err)
 		return "Array out of bounds.";
 	case 11:
 		return "Invalid variable reference.";
+	case 12:
+		return "Only one decimal place can be assigned.";
+	case 13:
+		return "A variable is not indexed by a negative number.";
 	}
 	return "Unknown error";
 }

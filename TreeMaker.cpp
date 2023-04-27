@@ -2,7 +2,7 @@
 
 OpNode TreeMaker::createTree(std::string text)
 {
-    std::vector<OpNode> nodes;
+	std::vector<OpNode> nodes;
 	OpNode temp;
 	if (text == "") {
 		ahand.report(3);
@@ -10,13 +10,6 @@ OpNode TreeMaker::createTree(std::string text)
 	}
 	double num1;
 	double num2;
-	bool hasnum1;
-	bool hasnum2;
-	bool canneg;
-	bool neg1;
-	bool neg2;
-	bool decimal1;
-	bool decimal2;
 	bool isnode1;
 	bool isnode2;
 	bool nfset;
@@ -25,8 +18,6 @@ OpNode TreeMaker::createTree(std::string text)
 	int dplas2;
 	int nodref;
 	bool cntch;
-	std::string var1;
-	std::string var2;
 	int cntprt;
 	std::string pic;
 	int ipic;
@@ -37,7 +28,7 @@ OpNode TreeMaker::createTree(std::string text)
 	bool incon;
 	tokenName curtok;
 	std::string temsym;
-	bool fexpr;
+	int exprnum;
 	int fundet;
 	int nodepl1, nodepl2;
 	valType vtype1, vtype2;
@@ -50,14 +41,13 @@ OpNode TreeMaker::createTree(std::string text)
 		ahand.report(4);
 		return temp;
 	}
-	
 	while (hasPeren(text)) {
 	resetlbl:
 		fundet = -1;
 		cntprt = 0;
 		frm = 0;
 		incon = false;
-		var1 = "";
+		vdet[0].clear();
 		cntch = true;
 		parcnt = 0;
 		while (cntprt < text.length() && !(text.substr(cntprt, 1) == ")" && parcnt == 1)) {
@@ -72,20 +62,19 @@ OpNode TreeMaker::createTree(std::string text)
 			if (pic == " ") {
 				incon = true;
 				if (cntch) {
-					var1 = "";
+					vdet[0].clear();
 					fundet = -1;
 					frm = -1;
 				}
-			}
-			else if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
+			}else if (vdet[0].isAccepted(text, cntprt)) {
 				incon = false;
 				if (cntch) {
-					var1 += pic;
-					for (int i = 0; i < 16; i++) if (var1 == trans.oFunNames[i]){
+
+					for (int i = 0; i < 16; i++) if (vdet[0].varnam == trans.oFunNames[i]) {
 						fundet = i;
-						break;						
+						break;
 					}
-					for (int i = 0; i < trans.funNames.size(); i++) if (var1 == trans.funNames.at(i)) {
+					for (int i = 0; i < trans.funNames.size(); i++) if (vdet[0].varnam == trans.funNames.at(i)) {
 						fundet = i + 16;
 						break;
 					}
@@ -93,19 +82,16 @@ OpNode TreeMaker::createTree(std::string text)
 				}
 			}
 			cntprt++;
-		}                                                                    
+		}
 		temp = createTree(text.substr(frm2 + 1, cntprt - frm2 - 1));
-		if (fundet > 15) {			
-			temp = combfun(temp, fundet - 16, false);
+		if (fundet > 15) {
+			temp = combfun(temp, fundet - 16, vdet[0].neg, false);
 			text = meth.emplace(text, frm, cntprt);
 			npl = countNodes(text, frm);
 			nodes.insert(nodes.begin() + npl, temp);
-		}
-		else {
-			
+		}else{
 			if (temp.Src.size() < 2 && temp.Src.at(0) == valValue) {
-				if (var1 != "") {
-					//if (fundet > -1) 
+				if (vdet[0].type == typeVar) {
 					if (fundet > -1) {
 						if (fundet < 14) {
 							double num = temp.Val.at(0);
@@ -113,7 +99,7 @@ OpNode TreeMaker::createTree(std::string text)
 							std::string rep = fromNum(num);
 							text = meth.RepText(text, rep, frm, cntprt);
 						}
-						
+
 						else {
 							//report error
 						}
@@ -124,18 +110,16 @@ OpNode TreeMaker::createTree(std::string text)
 						npl = countNodes(text, frm);
 						nodes.insert(nodes.begin() + npl, temp);
 					}
-				}
-				else {
+				}else{
 					double num = temp.Val.at(0);
 
 					std::string rep = fromNum(num);
 					text = meth.RepText(text, rep, frm, cntprt);
 				}
-			}
-			else {
-				if (var1 != "") {
+			}else {
+				if (vdet[0].type == typeVar) {
 
-					temp = combvar(temp, var1);
+					temp = combvar(temp, vdet[0].getVal());
 					if (fundet > -1) {
 						temp.Src.at(0) = valInternal;
 					}
@@ -154,21 +138,25 @@ OpNode TreeMaker::createTree(std::string text)
 			}
 		}
 	}
-	for (int pri = 0;pri < 9; pri++) {
+	bool accepted = false;
+	for (int i = 0; i < text.length(); i++) {
+		for (int j = 0; j < acChars.length(); j++) {
+			if (text.substr(i, 1) == acChars.substr(j, 1)) accepted = true;
+		}
+	}
+	if (!accepted) {
+		ahand.report(5);
+	}
+	for (int pri = 0; pri < 9; pri++) {
 		for (int sid = 0; sid < 2; sid++) {
 		resetlbl1:
 			cntprt = 0;
 			curtok = opNone;
-			fexpr = true;
-			var1 = "";
-			var2 = "";
-			neg1 = false;
-			neg2 = false;
-			canneg = false;
+			exprnum = 0;
+			vdet[0].clear();
+			vdet[1].clear();
 			num1 = 0;
 			num2 = 0;
-			decimal1 = false;
-			decimal2 = false;
 			isnode1 = false;
 			isnode2 = false;
 			nodref = -1;
@@ -177,140 +165,53 @@ OpNode TreeMaker::createTree(std::string text)
 			dplas1 = 0;
 			dplas2 = 0;
 			nodref = 0;
-			hasnum1 = false;
-			hasnum2 = false;
+
 			frm1 = -1;
 
 			temp.clear();
-
-			while (cntprt < text.length()) {
-				pic = text.substr(cntprt, 1);
+			while (cntprt < text.length() + 1) {
+				if (cntprt < text.length()) {
+					pic = text.substr(cntprt, 1);
+				}else{
+					pic = "~";
+				}
 				ipic = meth.asc(pic);
-
 				if (pic == " ") {
-					canneg = false;
-				}
-				else if (pic == "." || pic == "-" || (ipic > 47 && ipic < 58)) {
-
-					if (pic == "-") {
-						canneg = true;
-					}
-					else if (pic == ".") {
-						to = cntprt;
-						if (nfset) {
-							frm = cntprt;
-							if (canneg) frm--;
-							nfset = false;
-						}
-						if (nfset1) {
-							frm1 = cntprt;
-							if (canneg) frm1--;
-							nfset1 = false;
-						}
-						if (fexpr) {
-							if (canneg) neg1 = true;
-							if (decimal1) {
-								//report error
-							}
-							decimal1 = true;
-							hasnum1 = true;
-						}
-						else {
-							if (canneg) neg2 = true;
-							if (decimal2) {
-								//report error
-							}
-							decimal2 = true;
-							hasnum2 = true;
-						}
-					}
-					else {
-						to = cntprt;
-						if (nfset) {
-							frm = cntprt;
-							if (canneg) frm--;
-							nfset = false;
-						}
-						if (nfset1) {
-							frm1 = cntprt;
-							if (canneg) frm1--;
-							nfset1 = false;
-						}
-						if (fexpr) {
-							if (canneg) neg1 = true;
-							hasnum1 = true;
-							if (decimal1) {
-								dplas1++;
-								num1 += pow(10, -dplas1) * (ipic - 48);
-							}
-							else {
-								num1 *= 10;
-								num1 += ipic - 48;
-							}
-						}
-						else {
-							if (canneg) neg2 = true;
-							hasnum2 = true;
-							if (decimal2) {
-								dplas2++;
-								num2 += pow(10, -dplas2) * (ipic - 48);
-							}
-							else {
-								num2 *= 10;
-								num2 += ipic - 48;
-							}
-						}
-					}
 
 				}
-				else if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
+				else if (vdet[exprnum].isAccepted(text, cntprt)) {
 					to = cntprt;
 					if (nfset) {
 						frm = cntprt;
+
 						nfset = false;
 					}
 					if (nfset1) {
 						frm1 = cntprt;
+
 						nfset1 = false;
 					}
-					if (fexpr) {
-						var1 += pic;
+					if (vdet[exprnum].node) {
+
+						if (exprnum == 0) {                                          //////
+							isnode1 = true;
+							nodepl1 = countNodes(text, cntprt);
+						}
+						else {
+							isnode2 = true;
+							nodepl2 = countNodes(text, cntprt);
+						}
+						nodref = countNodes(text, cntprt);
 					}
-					else {
-						var2 += pic;
-					}
-				}
-				else if (pic == "#") {
-					to = cntprt;
-					if (nfset) {
-						frm = cntprt;
-						nfset = false;
-					}
-					if (nfset1) {
-						frm1 = cntprt;
-						nfset1 = false;
-					}
-					if (fexpr) {
-						isnode1 = true;
-						nodepl1 = countNodes(text, cntprt);
-					}
-					else {
-						isnode2 = true;
-						nodepl2 = countNodes(text, cntprt);
-					}
-					nodref = countNodes(text, cntprt);
 				}
 				else if (pic == ",") {
-					fexpr = true;
-					var1 = "";
-					var2 = "";
-					neg1 = false;
-					neg2 = false;
-					canneg = false;
+					exprnum = 0;
+					vdet[0].clear();
+					vdet[1].clear();
+
 					num1 = 0;
 					num2 = 0;
-					decimal1 = false;
-					decimal2 = false;
+
 					isnode1 = false;
 					isnode2 = false;
 					nodref = -1;
@@ -319,28 +220,22 @@ OpNode TreeMaker::createTree(std::string text)
 					dplas1 = 0;
 					dplas2 = 0;
 					nodref = 0;
-					hasnum1 = false;
-					hasnum2 = false;
 				}
 				else {
 					if (curtok != opNone) {
-						if (neg1) num1 *= -1;
-						if (neg2) num2 *= -1;
-						if (hasnum1 && hasnum2) {
+						if (vdet[0].type == typeNum && vdet[1].type == typeNum) {
+							num1 = vdet[0].getNum();
+							num2 = vdet[1].getNum();
 							std::string rep = fromNum(calc.Calculate(num1, num2, curtok));
 							text = meth.RepText(text, rep, frm, to + 1);
 							goto resetlbl1;
 						}
-						else if (sid == 1){
-							vtype1 = typeNone;
-							vtype2 = typeNone;
-							if (hasnum1) {
-								vtype1 = typeNum;
-							}
-							else if (var1 != "") {
-								vtype1 = typeVar;
-							}
-							else if (isnode1) {
+						else if (sid == 1) {
+							vtype1 = vdet[0].type;
+							vtype2 = vdet[1].type;
+							if (vtype1 == typeNum) num1 = vdet[0].getNum();
+							if (vtype2 == typeNum) num2 = vdet[1].getNum();
+							if (vtype1 == typeNode) {
 								if ((nodes.at(nodepl1).Src.at(0) == valInternal && nodes.at(nodepl1).Src.size() < 2) || (nodes.at(nodepl1).Src.at(0) == valExternal && nodes.at(nodepl1).Src.size() < 2)) {
 									vtype1 = typeFunc;
 								}
@@ -349,16 +244,9 @@ OpNode TreeMaker::createTree(std::string text)
 								}
 							}
 							else {
-								//report error
+								if (vtype1 == typeNone) ahand.report(6);
 							}
-
-							if (hasnum2) {
-								vtype2 = typeNum;
-							}
-							else if (var2 != "") {
-								vtype2 = typeVar;
-							}
-							else if (isnode2) {
+							if (vtype2 == typeNode) {
 								if ((nodes.at(nodepl2).Src.at(0) == valInternal && nodes.at(nodepl2).Src.size() < 2) || (nodes.at(nodepl2).Src.at(0) == valExternal && nodes.at(nodepl2).Src.size() < 2)) {
 									vtype2 = typeFunc;
 								}
@@ -367,7 +255,7 @@ OpNode TreeMaker::createTree(std::string text)
 								}
 							}
 							else {
-								//report error
+								if (vtype2 == typeNone) ahand.report(6);
 							}
 							if (vtype1 != typeNone && vtype2 != typeNone) {
 								nodref = countNodes(text, cntprt);
@@ -375,7 +263,7 @@ OpNode TreeMaker::createTree(std::string text)
 								case typeNum:
 									switch (vtype2) {
 									case typeVar:
-										temp = numwithvar(num1, var2, curtok);
+										temp = numwithvar(num1, vdet[0].getVal(), curtok);
 										nodes.insert(nodes.begin() + nodref, temp);
 										break;
 									case typeFunc:
@@ -391,19 +279,19 @@ OpNode TreeMaker::createTree(std::string text)
 								case typeVar:
 									switch (vtype2) {
 									case typeNum:
-										temp = varwithnum(var1, num2, curtok);
+										temp = varwithnum(vdet[0].getVal(), num2, curtok);
 										nodes.insert(nodes.begin() + nodref, temp);
 										break;
 									case typeVar:
-										temp = varwithvar(var1, var2, curtok);
+										temp = varwithvar(vdet[0].getVal(), vdet[1].getVal(), curtok);
 										nodes.insert(nodes.begin() + nodref, temp);
 										break;
 									case typeFunc:
-										temp = varwithfunc(var1, nodes.at(nodref), curtok);
+										temp = varwithfunc(vdet[0].getVal(), nodes.at(nodref), curtok);
 										nodes.at(nodref) = temp;
 										break;
 									case typeNode:
-										temp = varwithnode(var1, nodes.at(nodref), curtok);
+										temp = varwithnode(vdet[0].getVal(), nodes.at(nodref), curtok);
 										nodes.at(nodref) = temp;
 										break;
 									}
@@ -415,7 +303,7 @@ OpNode TreeMaker::createTree(std::string text)
 										nodes.at(nodref) = temp;
 										break;
 									case typeVar:
-										temp = funcwithvar(nodes.at(nodref), var2, curtok);
+										temp = funcwithvar(nodes.at(nodref), vdet[1].getVal(), curtok);
 										nodes.at(nodref) = temp;
 										break;
 									case typeFunc:
@@ -435,10 +323,9 @@ OpNode TreeMaker::createTree(std::string text)
 									case typeNum:
 										temp = nodewithnum(nodes.at(nodref), num2, curtok);
 										nodes.at(nodref) = temp;
-										//to = cntprt + 2;
 										break;
 									case typeVar:
-										temp = nodewithvar(nodes.at(nodref), var2, curtok);
+										temp = nodewithvar(nodes.at(nodref), vdet[1].getVal(), curtok);
 										nodes.at(nodref) = temp;
 										break;
 									case typeFunc:
@@ -456,13 +343,11 @@ OpNode TreeMaker::createTree(std::string text)
 								}
 								text = meth.emplace(text, frm, to + 1);
 								goto resetlbl1;
-							}
-							else {
+							}else {
 								return temp;
 							}
 						}
-					}
-					else {
+					}else{
 						for (int i = 0; i < int(smp.mathOps.length() / 2); i++) {
 							if (smp.priority[i] == pri) {
 								temsym = smp.mathOps.substr(i * 2, 2);
@@ -484,254 +369,63 @@ OpNode TreeMaker::createTree(std::string text)
 								}
 							}
 						}
-
-
 						nfset1 = true;
-						if (!fexpr && curtok == opNone) {
+						if (exprnum == 1 && curtok == opNone) {
 							frm = frm1;
 							isnode1 = isnode2;
 							isnode2 = false;
-							var1 = var2;
-							var2 = "";
-							num1 = num2;
-							num2 = 0;
-							hasnum1 = hasnum2;
-							hasnum2 = false;
-						}
-						decimal1 = false;
-						decimal2 = false;
-						dplas1 = 0;
-						dplas2 = 0;
-						fexpr = false;
+							vdet[0] = vdet[1];
+							vdet[1].clear();
 
+						}
+						exprnum = 1;
 					}
 				}
-
 				cntprt++;
 			}
-			if (curtok != opNone) {
-				if (neg1) num1 *= -1;
-				if (neg2) num2 *= -1;
-				if (hasnum1 && hasnum2) {
-					std::string rep = fromNum(calc.Calculate(num1, num2, curtok));
-					text = meth.RepText(text, rep, frm, cntprt - 1);
-					goto resetlbl1;
-				}
-				else if (sid == 1){
-					vtype1 = typeNone;
-					vtype2 = typeNone;
-					if (hasnum1) {
-						vtype1 = typeNum;
-					}
-					else if (var1 != "") {
-						vtype1 = typeVar;
-					}
-					else if (isnode1) {
-						if ((nodes.at(nodepl1).Src.at(0) == valInternal && nodes.at(nodepl1).Src.size() < 2) || (nodes.at(nodepl1).Src.at(0) == valExternal && nodes.at(nodepl1).Src.size() < 2)) {
-							vtype1 = typeFunc;
-						}
-						else {
-							vtype1 = typeNode;
-						}
-					}
-					else {
-						ahand.report(6);
-					}
-
-					if (hasnum2) {
-						vtype2 = typeNum;
-					}
-					else if (var2 != "") {
-						vtype2 = typeVar;
-					}
-					else if (isnode2) {
-						if ((nodes.at(nodepl2).Src.at(0) == valInternal && nodes.at(nodepl2).Src.size() < 2) || (nodes.at(nodepl2).Src.at(0) == valExternal && nodes.at(nodepl2).Src.size() < 2)) {
-							vtype2 = typeFunc;
-						}
-						else {
-							vtype2 = typeNode;
-						}
-					}
-					else {
-						ahand.report(6);
-					}
-
-					nodref = countNodes(text, cntprt);
-					switch (vtype1) {
-					case typeNum:
-						switch (vtype2) {
-						case typeVar:
-							temp = numwithvar(num1, var2, curtok);
-							nodes.insert(nodes.begin() + nodref, temp);
-							break;
-						case typeFunc:
-							temp = numwithfunc(num1, nodes.at(nodref), curtok);
-							nodes.at(nodref) = temp;
-							break;
-						case typeNode:
-							temp = numwithnode(num1, nodes.at(nodref), curtok);
-							nodes.at(nodref) = temp;
-							break;
-						}
-						break;
-					case typeVar:
-						switch (vtype2) {
-						case typeNum:
-							temp = varwithnum(var1, num2, curtok);
-							nodes.insert(nodes.begin() + nodref, temp);
-							break;
-						case typeVar:
-							temp = varwithvar(var1, var2, curtok);
-							nodes.insert(nodes.begin() + nodref, temp);
-							break;
-						case typeFunc:
-							temp = varwithfunc(var1, nodes.at(nodref), curtok);
-							nodes.at(nodref) = temp;
-							break;
-						case typeNode:
-							temp = varwithnode(var1, nodes.at(nodref), curtok);
-							nodes.at(nodref) = temp;
-							break;
-						}
-						break;
-					case typeFunc:
-						switch (vtype2) {
-						case typeNum:
-							temp = funcwithval(nodes.at(nodref), num2, curtok);
-							nodes.at(nodref) = temp;
-							break;
-						case typeVar:
-							temp = funcwithvar(nodes.at(nodref), var2, curtok);
-							nodes.at(nodref) = temp;
-							break;
-						case typeFunc:
-							temp = funcwithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-							nodes.at(nodref - 1) = temp;
-							nodes.erase(nodes.begin() + nodref);
-							break;
-						case typeNode:
-							temp = funcwithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-							nodes.at(nodref - 1) = temp;
-							nodes.erase(nodes.begin() + nodref);
-							break;
-						}
-						break;
-					case typeNode:
-						switch (vtype2) {
-						case typeNum:
-							temp = nodewithnum(nodes.at(nodref), num2, curtok);
-							nodes.at(nodref) = temp;							
-							break;
-						case typeVar:
-							temp = nodewithvar(nodes.at(nodref), var2, curtok);
-							nodes.at(nodref) = temp;
-							break;
-						case typeFunc:
-							temp = nodewithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-							nodes.at(nodref - 1) = temp;
-							nodes.erase(nodes.begin() + nodref);
-							break;
-						case typeNode:
-							temp = nodewithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-							nodes.at(nodref - 1) = temp;
-							nodes.erase(nodes.begin() + nodref);
-							break;
-						}
-						break;
-					}
-					
-					text = meth.emplace(text, frm, to);
-					goto resetlbl1;
-				}
-			}
+			
 		}
 	}
-	
-	
-	var1 = "";
-	
-	neg1 = false;
-	
-	canneg = false;
-	num1 = 0;
-	
-	decimal1 = false;
-	
+	vdet[0].clear();
 	isnode1 = false;
-	
 	nodref = -1;
-	
 	dplas1 = 0;
 	dplas2 = 0;
 	nodref = 0;
-	hasnum1 = false;
 	bool isnode = false;
 	frm1 = -1;
 	temp.clear();
 	OpNode ret;
-	bool accepted = false;
-	for (int i = 0; i < text.length(); i++) {
-		for (int j = 0; j < acChars.length(); j++) {
-			if (text.substr(i, 1) == acChars.substr(j, 1)) accepted = true;
-		}
-	}
-	if (!accepted) {
-		ahand.report(5);
-	}
+	
+	
 	if (detComma(text)) {
 		OpNode tpart;
-		
-		
 		for (int i = 0; i < text.length(); i++) {
 			pic = text.substr(i, 1);
 			ipic = meth.asc(pic);
 			if (pic == " ") {
-				canneg = false;
+
 			}
-			else if (pic == "." || pic == "-" || (ipic > 47 && ipic < 58)) {
-				if (pic == "-") {
-					canneg = true;
+			else if (vdet[0].isAccepted(text, i)) {
+				if (vdet[0].node) {
+					int npl = countNodes(text, i);
+					temp = nodes.at(npl);
+					isnode = true;
 				}
-				else if (pic == ".") {
-					if (canneg) neg1 = true;
-					if (decimal1) {
-						//report error
-					}
-					decimal1 = true;
-					hasnum1 = true;
-				}
-				else {
-					if (canneg) neg1 = true;
-					hasnum1 = true;
-					if (decimal1) {
-						dplas1++;
-						num1 += pow(10, -dplas1) * (ipic - 48);
-					}
-					else {
-						num1 *= 10;
-						num1 += ipic - 48;
-					}
-				}
-			}
-			else if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
-				var1 += pic;
-			}
-			else if (pic == "#") {
-				int npl = countNodes(text, i);
-				temp = nodes.at(npl);
-				isnode = true;
 			}
 			else if (pic == ",") {
-				if (hasnum1) {
+				if (vdet[0].type == typeNum) {
 					tpart.Src.push_back(valValue);
-					tpart.Val.push_back(num1);
-					
-				}else{
-					if (var1 != "") {
+					tpart.Val.push_back(vdet[0].getNum());
+
+				}
+				else {
+					if (vdet[0].type = typeVar) {
 						tpart.Src.push_back(valVar);
-						tpart.Var.push_back(vars.getRef(var1));
-					}else{
-						if (isnode) {
+						tpart.Var.push_back(vdet[0].getVal());
+					}
+					else {
+						if (vdet[0].type == typeNode) {
 							tpart.Src.push_back(valNode);
 							tpart.nodes.push_back(temp);
 							isnode = false;
@@ -740,24 +434,21 @@ OpNode TreeMaker::createTree(std::string text)
 				}
 				ret.nodes.push_back(tpart);
 				tpart.clear();
-				var1 = "";
-				num1 = 0;
-				hasnum1 = false;
-				decimal1 = false;
-				dplas1 = 0;
-				neg1 = false;
-				canneg = false;
+				vdet[0].clear();
+
 			}
+
+
 		}
-		if (hasnum1) {
+		if (vdet[0].type == typeNum) {
 			tpart.Src.push_back(valValue);
-			tpart.Val.push_back(num1);
+			tpart.Val.push_back(vdet[0].getNum());
 			ret.nodes.push_back(tpart);
 		}
 		else {
-			if (var1 != "") {
+			if (vdet[0].type == typeVar) {
 				tpart.Src.push_back(valVar);
-				tpart.Var.push_back(vars.getRef(var1));
+				tpart.Var.push_back(vdet[0].getVal());
 				ret.nodes.push_back(tpart);
 			}
 			else {
@@ -771,69 +462,41 @@ OpNode TreeMaker::createTree(std::string text)
 		}
 		return ret;
 	}else{
-		
 		for (int i = 0; i < text.length(); i++) {
 			pic = text.substr(i, 1);
 			ipic = meth.asc(pic);
 			if (pic == " ") {
-				canneg = false;
+
 			}
-			else if (pic == "." || pic == "-" || (ipic > 47 && ipic < 58)) {
-				if (pic == "-") {
-					canneg = true;
+			else if (vdet[0].isAccepted(text, i)) {
+				if (vdet[0].node) {
+					temp = nodes.at(0);
+					isnode = true;
 				}
-				else if (pic == ".") {
-					if (canneg) neg1 = true;
-					if (decimal1) {
-						//report error
-					}
-					decimal1 = true;
-					hasnum1 = true;
-				}
-				else {
-					if (canneg) neg1 = true;
-					hasnum1 = true;
-					if (decimal1) {
-						dplas1++;
-						num1 += pow(10, -dplas1) * (ipic - 48);
-					}
-					else {
-						num1 *= 10;
-						num1 += ipic - 48;
-					}
-				}
-			}
-			else if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
-				var1 += pic;
-			}
-			else if (pic == "#") {
-				temp = nodes.at(0);
-				isnode = true;
 			}
 		}
-		if (hasnum1) {
+		if (vdet[0].type == typeNum) {
 			temp.Src.push_back(valValue);
-			temp.Val.push_back(num1);
+			temp.Val.push_back(vdet[0].getNum());
 		}
-		else if (!isnode) {
+		else if (vdet[0].type == typeVar) {
 			temp.Src.push_back(valVar);
-			temp.Var.push_back(vars.getRef(var1));
+			temp.Var.push_back(vdet[0].getVal());
 		}
-		ret.nodes.push_back(temp);
 		return temp;
 	}
 }
 
-OpNode TreeMaker::combvar(OpNode inod, std::string var)
+OpNode TreeMaker::combvar(OpNode inod, varinc var)
 {
 	OpNode ret;
 	ret.nodes.push_back(inod);
 	ret.Src.push_back(valIndexed);
-	ret.Var.push_back(vars.getRef(var));
+	ret.Var.push_back(var);
 	return ret;
 }
 
-OpNode TreeMaker::combfun(OpNode inod, int fun, bool internal)
+OpNode TreeMaker::combfun(OpNode inod, int fun, bool neg, bool internal)
 {
 	OpNode ret;
 	ret.nodes.push_back(inod);
@@ -842,7 +505,10 @@ OpNode TreeMaker::combfun(OpNode inod, int fun, bool internal)
 	}else{
 		ret.Src.push_back(valExternal);
 	}
-	ret.Var.push_back(fun);
+	varinc inc;
+	inc.num = fun;
+	inc.neg = neg;
+	ret.Var.push_back(inc);
 	return ret;
 }
 
@@ -850,9 +516,11 @@ OpNode TreeMaker::combfun(OpNode inod, int fun, bool internal)
 int TreeMaker::countNodes(std::string text, int index)
 {
     int cnt = -1;
-    for (int i = 0; i < index - 1; i++) if (text.substr(i, 1) == "#") cnt++;
+	
+	for (int i = 0; i < index - 1; i++) if (text.substr(i, 1) == "#") cnt++;
 	if (cnt < 0) cnt = 0;
-    return cnt;
+	return cnt;
+	
 }
 
 
@@ -882,46 +550,46 @@ bool TreeMaker::detComma(std::string text)
 	return false;
 }
 
-OpNode TreeMaker::numwithvar(double num, std::string var, tokenName token)
+OpNode TreeMaker::numwithvar(double num, varinc var, tokenName token)
 {
 	OpNode ret;
 	ret.Src.push_back(valValue);
 	ret.Src.push_back(valVar);
 	ret.Val.push_back(num);
-	ret.Var.push_back(vars.getRef(var));
+	ret.Var.push_back(var);
 	ret.oper = token;
 	return ret;
 }
 
-OpNode TreeMaker::varwithnum(std::string var, double num, tokenName token)
+OpNode TreeMaker::varwithnum(varinc var, double num, tokenName token)
 {
 	OpNode ret;
 	ret.Src.push_back(valVar);
-	ret.Src.push_back(valValue);	
+	ret.Src.push_back(valValue);
 	ret.Val.push_back(num);
-	ret.Var.push_back(vars.getRef(var));
+	ret.Var.push_back(var);
 	ret.oper = token;
 	return ret;
 }
 
-OpNode TreeMaker::varwithvar(std::string var1, std::string var2, tokenName token)
+OpNode TreeMaker::varwithvar(varinc var1, varinc var2, tokenName token)
 {
 	OpNode ret;
 	ret.Src.push_back(valVar);
 	ret.Src.push_back(valVar);
-	ret.Var.push_back(vars.getRef(var1));
-	ret.Var.push_back(vars.getRef(var2));
+	ret.Var.push_back(var1);
+	ret.Var.push_back(var2);
 	ret.oper = token;
 	return ret;
 }
 
-OpNode TreeMaker::varwithnode(std::string var, OpNode nod, tokenName token)
+OpNode TreeMaker::varwithnode(varinc var, OpNode nod, tokenName token)
 {
 	OpNode ret;
 	if (nod.Src.size() < 2) {
 		ret.Src.push_back(valVar);
 		ret.Src.push_back(nod.Src.at(0));
-		ret.Var.push_back(vars.getRef(var));
+		ret.Var.push_back(var);
 		ret.Var.push_back(nod.Var.at(0));
 		switch (nod.Src.at(0)) {
 		case valIndexed:
@@ -931,41 +599,44 @@ OpNode TreeMaker::varwithnode(std::string var, OpNode nod, tokenName token)
 			ret.Val.push_back(nod.Val.at(0));
 			break;
 		}
-	}else{
+	}
+	else {
 		ret.Src.push_back(valVar);
 		ret.Src.push_back(valNode);
-		ret.Var.push_back(vars.getRef(var));
-		ret.nodes.push_back(nod);
-	}	
-	ret.oper = token;
-	return ret;
-}
-
-OpNode TreeMaker::nodewithvar(OpNode nod, std::string var, tokenName token)
-{
-	OpNode ret;
-	if (nod.Src.size() < 2) {
-		ret.Src.push_back(nod.Src.at(0));
-		ret.Src.push_back(valVar);		
-		ret.Var.push_back(vars.getRef(var));
-		ret.Var.push_back(nod.Var.at(0));
-		switch (nod.Src.at(0)) {
-		case valIndexed:
-			ret.nodes.push_back(nod.nodes.at(0));
-			break;
-		case valFixed:
-			ret.Val.push_back(nod.Val.at(0));
-			break;
-		}
-	}else{
-		ret.Src.push_back(valNode);
-		ret.Src.push_back(valVar);
-		ret.Var.push_back(vars.getRef(var));
+		ret.Var.push_back(var);
 		ret.nodes.push_back(nod);
 	}
 	ret.oper = token;
 	return ret;
 }
+
+OpNode TreeMaker::nodewithvar(OpNode nod, varinc var, tokenName token)
+{
+	OpNode ret;
+	if (nod.Src.size() < 2) {
+		ret.Src.push_back(nod.Src.at(0));
+		ret.Src.push_back(valVar);
+		ret.Var.push_back(var);
+		ret.Var.push_back(nod.Var.at(0));
+		switch (nod.Src.at(0)) {
+		case valIndexed:
+			ret.nodes.push_back(nod.nodes.at(0));
+			break;
+		case valFixed:
+			ret.Val.push_back(nod.Val.at(0));
+			break;
+		}
+	}
+	else {
+		ret.Src.push_back(valNode);
+		ret.Src.push_back(valVar);
+		ret.Var.push_back(var);
+		ret.nodes.push_back(nod);
+	}
+	ret.oper = token;
+	return ret;
+}
+
 
 OpNode TreeMaker::numwithnode(double num, OpNode nod, tokenName token)
 {
@@ -1077,27 +748,29 @@ OpNode TreeMaker::funcwithval(OpNode nod, double num, tokenName token)
 	return ret;
 }
 
-OpNode TreeMaker::varwithfunc(std::string var, OpNode nod, tokenName token)
+OpNode TreeMaker::varwithfunc(varinc var, OpNode nod, tokenName token)
 {
 	OpNode ret;
 	ret.Src.push_back(valVar);
 	ret.Src.push_back(nod.Src.at(0));
-	ret.Var.push_back(vars.getRef(var));
-	ret.Var.push_back(nod.Var.at(0));	
+	ret.Var.push_back(var);
+	ret.Var.push_back(nod.Var.at(0));
 	ret.nodes.push_back(nod.nodes.at(0));
 	return ret;
 }
 
-OpNode TreeMaker::funcwithvar(OpNode nod, std::string var, tokenName token)
+OpNode TreeMaker::funcwithvar(OpNode nod, varinc var, tokenName token)
 {
 	OpNode ret;
 	ret.Src.push_back(nod.Src.at(0));
 	ret.Src.push_back(valVar);
 	ret.Var.push_back(nod.Var.at(0));
-	ret.Var.push_back(vars.getRef(var));
+	ret.Var.push_back(var);
 	ret.nodes.push_back(nod.nodes.at(0));
 	return ret;
 }
+
+
 
 OpNode TreeMaker::funcwithnode(OpNode nod1, OpNode nod2, tokenName token)
 {

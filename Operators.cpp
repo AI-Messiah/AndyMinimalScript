@@ -29,10 +29,12 @@ double OpNode::evaluate()
 			break;
 		case valVar:
 			if (fside == 0) {
-				val1 = vars.Get(Var.at(varcnt), 0);
+				val1 = vars.Get(Var.at(varcnt).num, 0);
+				if(Var.at(varcnt).neg) val1 *= -1;
 			}
 			else {
-				val2 = vars.Get(Var.at(varcnt), 0);
+				val2 = vars.Get(Var.at(varcnt).num, 0);
+				if (Var.at(varcnt).neg) val2 *= -1;
 			}
 			varcnt++;
 			break;
@@ -56,11 +58,13 @@ double OpNode::evaluate()
 		case valIndexed:
 			if (fside == 0) {
 				nval1 = nodes.at(nodcnt).evaluate();
-				val1 = vars.Get(Var.at(varcnt), nval1);
+				val1 = vars.Get(Var.at(varcnt).num, nval1);
+				if (Var.at(varcnt).neg) val1 *= -1;
 			}
 			else {
 				nval2 = nodes.at(nodcnt).evaluate();
-				val2 = vars.Get(Var.at(varcnt), nval2);
+				val2 = vars.Get(Var.at(varcnt).num, nval2);
+				if (Var.at(varcnt).neg) val2 *= -1;
 			}
 			nodcnt++;
 			varcnt++;
@@ -68,11 +72,13 @@ double OpNode::evaluate()
 		case valFixed:
 			if (fside == 0) {
 				nval1 = Val.at(varcnt);
-				val1 = vars.Get(Var.at(varcnt), nval1);
+				val1 = vars.Get(Var.at(varcnt).num, nval1);
+				if (Var.at(varcnt).neg) val1 *= -1;
 			}
 			else {
 				nval2 = Val.at(varcnt);
-				val2 = vars.Get(Var.at(varcnt), nval2);
+				val2 = vars.Get(Var.at(varcnt).num, nval2);
+				if (Var.at(varcnt).neg) val2 *= -1;
 			}
 			numcnt++;
 			varcnt++;
@@ -80,10 +86,12 @@ double OpNode::evaluate()
 		case valInternal:
 			if (fside == 0) {
 				nval1 = nodes.at(nodcnt).evaluate();				
-				val1 = trans.calFun(Var.at(varcnt), nval1);
+				val1 = trans.calFun(Var.at(varcnt).num, nval1);
+				if (Var.at(varcnt).neg) val1 *= -1;
 			}else{
 				nval1 = nodes.at(nodcnt).evaluate();				
-				val2 = trans.calFun(Var.at(varcnt), nval1);
+				val2 = trans.calFun(Var.at(varcnt).num, nval2);
+				if (Var.at(varcnt).neg) val2 *= -1;
 			}
 			nodcnt++;
 			varcnt++;
@@ -102,7 +110,8 @@ double OpNode::evaluate()
 						pargs.push_back(nval1);
 					}
 				}
-				val1 = trans.callext(Var.at(varcnt), pargs);
+				val1 = trans.callext(Var.at(varcnt).num, pargs);
+				if (Var.at(varcnt).neg) val1 *= -1;
 				nodcnt++;
 				varcnt++;
 			}else{
@@ -111,7 +120,8 @@ double OpNode::evaluate()
 					nval1 = nodes.at(nodcnt).nodes.at(i).evaluate();
 					pargs.push_back(nval1);
 				}
-				val2 = trans.callext(Var.at(varcnt), pargs);
+				val2 = trans.callext(Var.at(varcnt).num, pargs);
+				if (Var.at(varcnt).neg) val2 *= -1;
 			}
 			nodcnt++;
 			varcnt++;
@@ -133,9 +143,7 @@ double OpNode::evaluate()
 void OpNode::clear()
 {
 	oper = opNone;
-	empty = false;
-	levels = 0;
-	left = false;
+	
 	
 	Src.clear();
 	Val.clear();
@@ -151,15 +159,18 @@ bool OpNode::assign(tokenName tok, double ival)
 		double par = 0;
 		switch (Src.at(0)) {
 		case valVar:
-			prevVal = vars.SetGet(Var.at(0), 0);
+			prevVal = vars.SetGet(Var.at(0).num, 0);
+			
 			break;
 		case valFixed:
 			par = Val.at(0);
-			prevVal = vars.SetGet(Var.at(0), int(par));
+			prevVal = vars.SetGet(Var.at(0).num, int(par));
+			
 			break;
 		case valIndexed:
 			par = nodes.at(0).evaluate();
-			prevVal = vars.SetGet(Var.at(0), int(par));
+			prevVal = vars.SetGet(Var.at(0).num, int(par));
+			
 			break;
 		default:
 			//report error
@@ -174,7 +185,7 @@ bool OpNode::assign(tokenName tok, double ival)
 		double fval = 0;
 		if (prevVal.defined) fval = prevVal.value;
 		fval = calc.Calculate(fval, ival, tok);
-		vars.Set(Var.at(0), fval, int(par));
+		vars.Set(Var.at(0).num, fval, int(par));
 		return true;
 	}else if (Src.size() == 0) {
 		//report error

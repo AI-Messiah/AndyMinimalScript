@@ -319,11 +319,15 @@ void Process::Run()
 	double val;
 	tokenName tok;
 	bool hasval;
+	bool skip = false;
 	while (linenum < lines.size()) {
 		if (ahand.beenReported) return;
 		ahand.line = textlines.at(linenum);
 		ahand.curline = linenum + 1;
 		current = lines.at(linenum);
+		if (linenum == 12) {
+			int non = 0;
+		}
 		if (current.ifend || current.whilend) {
 			linenum = current.whret;
 		}
@@ -351,6 +355,7 @@ void Process::Run()
 			case whileLine:
 				val = current.op1.evaluate();
 				if (val == 0) linenum = current.line1;
+				skip = (val == 0);
 				break;
 
 			case gotoLine:
@@ -360,7 +365,7 @@ void Process::Run()
 				return;
 			}
 		}
-		if (current.type != gotoLine && !(current.ifend || current.whilend)) linenum++;
+		if (current.type != gotoLine && !(current.type == whileLine && skip) && !(current.ifend || current.whilend)) linenum++;
 	}
 	
 }
