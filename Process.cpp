@@ -197,20 +197,28 @@ void Process::convert(std::string text)
 				cmpprt += pic;
 				if (holdWord == defLine && pic == "=") setval = true;
 				if (cmpprt.length() < 3) {
-					for (int i = 0; i < amap.asdOps.length() / 2; i++) {
-						std::string cmp = amap.asdOps.substr(i * 2, 2);
-						if (cmp.substr(1, 1) == " ") cmp = cmp.substr(0, 1);
-						if (cmp == cmpprt && holdWord != defLine) {
-							holdWord = varLine;
-							if (cmp == "=") {
-								aline.op1 = maker.createTree(whole.substr(0, whocnt - 2));
+					if (holdWord == funLine) {
+						for (int i = 0; i < amap.asdOps.length() / 2; i++) {
+							std::string cmp = amap.asdOps.substr(i * 2, 2);
+							if (cmp.substr(1, 1) == " ") cmp = cmp.substr(0, 1);
+							std::string pic1 = "";
+							if (i < linetext.length() - 1) pic1 = linetext.substr(i + 1,1);
+							if (true){ //
+								if (cmp == cmpprt && holdWord != defLine) {
+									holdWord = varLine;
+									if (cmp == "=") {
+										if (pic1 != "=" || holdWord != funLine){
+											aline.op1 = maker.createTree(whole.substr(0, whocnt - 2));
+										}
+									}
+									else {
+										aline.op1 = maker.createTree(whole.substr(0, whocnt - 3));
+									}
+									lastwhole = whole;
+									whole = "";
+									aline.equtype = amap.convertedTokens[cmp];
+								}
 							}
-							else {
-								aline.op1 = maker.createTree(whole.substr(0, whocnt - 3));
-							}
-							lastwhole = whole;
-							whole = "";							
-							aline.equtype = amap.convertedTokens[cmp];
 						}
 					}
 				}

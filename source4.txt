@@ -1,0 +1,5 @@
+def av = 0
+while(av < 10){
+print(av < 5)
+av += 1
+}
