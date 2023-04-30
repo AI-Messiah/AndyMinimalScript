@@ -135,7 +135,7 @@ double OpNode::evaluate()
 	else if (fside == 2) {
 		return calc.Calculate(val1, val2, oper);
 	}else{
-		//report error
+		ahand.report(22);
 		return 0;
 	}
 }
@@ -172,14 +172,14 @@ bool OpNode::assign(tokenName tok, double ival)
 			prevVal = vars.SetGet(Var.at(0).num, int(par));
 			
 			break;
-		default:
-			//report error
+		default:			
+			ahand.report(20);
 			return false;
 			break;
 		}
 		bool avail = (tok == opAssignDirect || prevVal.defined);
 		if (!avail) {
-			//report error
+			ahand.report(19);
 			return false;
 		}
 		double fval = 0;
@@ -188,9 +188,9 @@ bool OpNode::assign(tokenName tok, double ival)
 		vars.Set(Var.at(0).num, fval, int(par));
 		return true;
 	}else if (Src.size() == 0) {
-		//report error
+		ahand.report(21);
 	}else{
-		//report error
+		ahand.report(20);
 	}
 	return false;
 }

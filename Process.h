@@ -1,6 +1,7 @@
 #pragma once
 #include "ascii.h"
 #include "TreeMaker.h"
+#include "ResCheck.h"
 
 enum lineType {
 	emptyLine,
@@ -39,7 +40,7 @@ private:
 	Line newLine();
 	int findline(int linenum);
 	int findend(std::string text, int loc, int linenum);
-	
+	ResCheck res;
 	Maps amap;
 	strmeth meth;
 	std::vector<Line> lines;

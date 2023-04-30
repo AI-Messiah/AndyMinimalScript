@@ -194,44 +194,37 @@ void Process::convert(std::string text)
 				
 			}
 			else {
-				cmpprt += pic;
-				if (holdWord == defLine && pic == "=") setval = true;
-				if (cmpprt.length() < 3) {
-					if (holdWord == funLine) {
-						for (int i = 0; i < amap.asdOps.length() / 2; i++) {
-							std::string cmp = amap.asdOps.substr(i * 2, 2);
-							if (cmp.substr(1, 1) == " ") cmp = cmp.substr(0, 1);
-							std::string pic1 = "";
-							if (i < linetext.length() - 1) pic1 = linetext.substr(i + 1,1);
-							if (true){ //
-								if (cmp == cmpprt && holdWord != defLine) {
-									holdWord = varLine;
-									if (cmp == "=") {
-										if (pic1 != "=" || holdWord != funLine){
-											aline.op1 = maker.createTree(whole.substr(0, whocnt - 2));
-										}
-									}
-									else {
-										aline.op1 = maker.createTree(whole.substr(0, whocnt - 3));
-									}
-									lastwhole = whole;
-									whole = "";
-									aline.equtype = amap.convertedTokens[cmp];
-								}
-							}
-						}
+				
+				if (holdWord == defLine && pic == "=") setval = true;				
+				if (holdWord == funLine) {
+					for (int i = 0; i < amap.asdOps.length() / 2; i++) {
+						std::string cmp = amap.asdOps.substr(i * 2, 2);
+							
+						std::string pic1 = "";
+						if (i < linetext.length() - 1) pic1 = linetext.substr(i + 1,1);						
+						if (cmp == pic + pic1 && holdWord != defLine) {
+							holdWord = varLine;
+							aline.op1 = maker.createTree(whole.substr(0, whocnt - 2));
+							res.Check(whole.substr(0, whocnt - 2));
+							lastwhole = whole;
+							whole = "";
+							aline.equtype = amap.convertedTokens[cmp];
+						}						
 					}
 				}
+				
 			}
 		}
 		linenum++;
 		
 		switch (holdWord) {
 		case funLine:
+			res.Check(whole);
 			aline.op1 = maker.createTree(whole.substr(0, whole.length()));
 			break;
 		case varLine:
 			//aline.op1 = maker.createTree(lastwhole.substr(0, lastwhole.length() - 1));
+			res.Check(whole);
 			aline.op2 = maker.createTree(whole.substr(0, whole.length()));
 			break;
 		case defLine:
@@ -241,8 +234,10 @@ void Process::convert(std::string text)
 			aline.line1 = size;
 			aline.val = asig;
 			aline.labname = expvar;
+			res.Check(expvar);
 			break;
 		case ifLine:
+			res.Check(insparen);
 			insparen = insparen.substr(0, insparen.length() - 1);
 			aline.op1 = maker.createTree(insparen);
 
@@ -251,6 +246,7 @@ void Process::convert(std::string text)
 
 			break;
 		case whileLine:
+			res.Check(insparen);
 			insparen = insparen.substr(0, insparen.length() - 1);
 			aline.op1 = maker.createTree(insparen);
 			break;
@@ -258,6 +254,7 @@ void Process::convert(std::string text)
 			aline.labname = expdef;
 			break;
 		case labelLine:
+			res.Check(expdef);
 			aline.labname = expdef;
 			aline.type = labelLine;
 			break;
@@ -291,7 +288,7 @@ void Process::convert(std::string text)
 				Line seclin = lines.at(j);
 				if (i != j && curlin.labname == seclin.labname) {
 					if (seclin.type == labelLine) {
-						//report error
+						ahand.report(15);
 					}else{
 						seclin.line1 = i;
 					}					

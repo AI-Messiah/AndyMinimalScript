@@ -38,7 +38,7 @@ bool VarDetect::isAccepted(std::string text, int pla)
                 if ((iaft > 47 && iaft < 58) || aft == "-") {
                     hase = true;
                 }else{
-                    //report error
+                    ahand.report(17);
                 }
             }
         }
@@ -50,7 +50,7 @@ bool VarDetect::isAccepted(std::string text, int pla)
     }else if (pic == "." || (ipic > 47 && ipic < 58)) {
         if (pic == ".") {
             if (decimal) {
-                //report error
+                ahand.report(16);
             }
             decimal = true;
             return true;
@@ -112,7 +112,7 @@ double VarDetect::getNum()
         ret = val * pow(10, exp);
     }
     catch (_exception e) {
-        //report error
+        ahand.report(18);
         ret = 0;
     }
     return ret;

@@ -2,7 +2,6 @@
 
 ErrorHandler ahand;
 
-
 int Variables::getRef(std::string name)
 {
 	if (refs.contains(name)) {
@@ -119,15 +118,19 @@ double Variables::Get(int num, int par)
 					return vplas.at(num).vals.at(par).value;
 				}
 				else {
-					//report error(9);
+					ahand.report(23);
 				}
 			}
 			else {
-				//report error(6);				
+				if (par < 0) {
+					ahand.report(13);
+				}else{
+					ahand.report(10);
+				}						
 			}
 		}
 		else {
-			//report error(7);			
+			ahand.report(8);
 		}
 
 	}

@@ -58,6 +58,28 @@ std::string ErrorHandler::getMessage(int err)
 		return "Only one decimal place can be assigned.";
 	case 13:
 		return "A variable is not indexed by a negative number.";
+	case 14:
+		return "Missing identifyer.";
+	case 15:
+		return "Duplicaate label.";
+	case 16:
+		return "Duplicate decimal point.";
+	case 17:
+		return "Word e is reserved for scientific notation.";
+	case 18:
+		return "Overflow detected in number.";
+	case 19:
+		return "Non direct assignment with undefined variable.";
+	case 20:
+		return "Only a variable can be assigned.";
+	case 21:
+		return "Nothing to assgin to.";
+	case 22:
+		return "Invalid structure.";
+	case 23:
+		return "Cannot get undefined variable.";
+	case 24:
+		return "Use of reserved word.";
 	}
 	return "Unknown error";
 }

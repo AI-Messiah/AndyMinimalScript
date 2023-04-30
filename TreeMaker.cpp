@@ -344,6 +344,7 @@ OpNode TreeMaker::createTree(std::string text)
 								text = meth.emplace(text, frm, to + 1);
 								goto resetlbl1;
 							}else {
+								ahand.report(14);
 								return temp;
 							}
 						}
