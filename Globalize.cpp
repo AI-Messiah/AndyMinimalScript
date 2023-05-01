@@ -1,5 +1,6 @@
 #include "Globalize.h"
-
-Variables vars;
-Transit trans;
-Calculator calc;
+namespace AndyInt {
+	Variables vars;
+	Transit trans;
+	Calculator calc;
+}

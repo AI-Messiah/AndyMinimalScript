@@ -153,8 +153,8 @@ void Process::convert(std::string text)
 			
 		}
 		pcnt++;
-		ahand.line = linetext;
-		ahand.curline = linenum + 1;
+		AndyInt::ahand.line = linetext;
+		AndyInt::ahand.curline = linenum + 1;
 		textlines.push_back(linetext);
 		for (int i = 0; i < linetext.length(); i++) {
 			pic = linetext.substr(i, 1);
@@ -253,10 +253,10 @@ void Process::convert(std::string text)
 
 			}
 			else if (pic == "{") {
-				vars.IncScope();
+				AndyInt::vars.IncScope();
 			}
 			else if (pic == "}") {
-				vars.DecScope();
+				AndyInt::vars.DecScope();
 			}
 			else if (pic == "\n") {
 				
@@ -300,7 +300,7 @@ void Process::convert(std::string text)
 			break;
 		case defLine:
 			if (size == 0) size = 1;
-			vars.Create(expvar, asig, setval, size);
+			AndyInt::vars.Create(expvar, asig, setval, size);
 			if (setval) size = -1;
 			aline.line1 = size;
 			aline.val = asig;
@@ -359,7 +359,7 @@ void Process::convert(std::string text)
 				Line seclin = lines.at(j);
 				if (i != j && curlin.labname == seclin.labname) {
 					if (seclin.type == labelLine) {
-						ahand.report(15);
+						AndyInt::ahand.report(15);
 					}else{
 						seclin.line1 = i;
 					}					
@@ -382,9 +382,9 @@ void Process::convert(std::string text)
 		}
 		
 	}
-	vars.clear();
-	ahand.sendErrors();
-	ahand.reponce = true;
+	AndyInt::vars.clear();
+	AndyInt::ahand.sendErrors();
+	AndyInt::ahand.reponce = true;
 	Run();
 }
 
@@ -393,13 +393,13 @@ void Process::Run()
 	int linenum = 0;
 	Line current;
 	double val;
-	tokenName tok;
+	AndyInt::tokenName tok;
 	bool hasval;
 	bool skip = false;
 	while (linenum < lines.size()) {
-		if (ahand.beenReported) return;
-		ahand.line = textlines.at(linenum);
-		ahand.curline = linenum + 1;
+		if (AndyInt::ahand.beenReported) return;
+		AndyInt::ahand.line = textlines.at(linenum);
+		AndyInt::ahand.curline = linenum + 1;
 		current = lines.at(linenum);
 		if (linenum == 12) {
 			int non = 0;
@@ -413,7 +413,7 @@ void Process::Run()
 			case defLine:
 				hasval = current.line1 < 0;
 				if (current.line1 < 1) current.line1 = 1;
-				vars.Create(current.labname, current.val, hasval, current.line1);
+				AndyInt::vars.Create(current.labname, current.val, hasval, current.line1);
 				break;
 			case varLine:
 				val = current.op2.evaluate();
@@ -472,7 +472,7 @@ int Process::findline(int linenum)
 	}
 	if (ret < 0) {
 		ret = 0;
-		ahand.report(2);
+		AndyInt::ahand.report(2);
 	}
 	return ret;
 }
@@ -493,6 +493,6 @@ int Process::findend(std::string text, int loc, int linenum)
 			linenum++;			
 		}
 	}
-	ahand.report(1);
+	AndyInt::ahand.report(1);
 	return 0;
 }

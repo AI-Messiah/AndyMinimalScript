@@ -4,26 +4,26 @@
 #include <string>
 #include <map>
 
+namespace AndyInt {
+	enum tokenType {
+		Operator,
+		Assignment
+	};
+	struct tokenProperty {
+		tokenType type;
+		bool internal;
+		bool ambiguous;
+	};
 
-enum tokenType {
-	Operator,
-	Assignment
-};
-struct tokenProperty {
-	tokenType type;
-	bool internal;
-	bool ambiguous;
-};
-
-class Maps
-{
-public:
-	Maps();
-	~Maps();
-	std::string asdOps = "*=/=\\=+=-== ";
-	std::map<std::string, tokenName> convertedTokens;
-	std::map<tokenName, tokenProperty> convertedProperties;
-	std::string mathOps = "^ * / \\ + - & | > < ==!=>=<=! &&||*=/=\\=+=-== ";
-	int priority[22];
-};
-
+	class Maps
+	{
+	public:
+		Maps();
+		~Maps();
+		std::string asdOps = "*=/=\\=+=-== ";
+		std::map<std::string, tokenName> convertedTokens;
+		std::map<tokenName, tokenProperty> convertedProperties;
+		std::string mathOps = "^ * / \\ + - & | > < ==!=>=<=! &&||*=/=\\=+=-== ";
+		int priority[22];
+	};
+}

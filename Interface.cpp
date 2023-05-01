@@ -8,15 +8,15 @@ void Interface::handleScript(std::string text)
 
 void Interface::setFunction(std::string name, std::function<double(std::vector<double>)> address)
 {
-	trans.setFunction(name, address);
+	AndyInt::trans.setFunction(name, address);
 }
 
 void Interface::setErrorHandler(std::function<void(std::vector<errInfo>)> ahan)
 {
-	ahand.setHandler(ahan);
+	AndyInt::ahand.setHandler(ahan);
 }
 
-OpNode Interface::debugTree(std::string text)
+AndyInt::OpNode Interface::debugTree(std::string text)
 {
 	return proc.maker.createTree(text);
 }

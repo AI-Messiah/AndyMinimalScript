@@ -27,8 +27,8 @@ struct Line {
 	double val;
 	std::string labname;
 	lineType type;
-	tokenName equtype;
-	OpNode op1, op2;
+	AndyInt::tokenName equtype;
+	AndyInt::OpNode op1, op2;
 	int line1, line2, whret;
 	bool whilend;
 	bool ifend;
@@ -41,16 +41,16 @@ public:
 	void Preptext(std::string text);
 	void convert(std::string text);
 	std::map<std::string, lineType> match;
-	TreeMaker maker;
+	AndyInt::TreeMaker maker;
 private:
 	void Run();
 	Line newLine();
 	int findline(int linenum);
 	int findend(std::string text, int loc, int linenum);
 	std::string opers = "^*/\\+&|!=<>";
-	ResCheck res;
-	Maps amap;
-	strmeth meth;
+	AndyInt::ResCheck res;
+	AndyInt::Maps amap;
+	AndyInt::strmeth meth;
 	std::vector<Line> lines;
 	std::vector<std::string> textlines;
 };
