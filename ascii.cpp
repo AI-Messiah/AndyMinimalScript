@@ -41,3 +41,14 @@ std::string strmeth::insertRet(std::string text, int place)
 	}
 	return ret;
 }
+
+std::string strmeth::insertSpa(std::string text, int place)
+{
+	std::string ret = "";
+	if (place < text.length()) {
+		ret = text.substr(0, place);
+		ret += " ";
+		ret += text.substr(place, text.length() - place + 1);
+	}
+	return ret;
+}

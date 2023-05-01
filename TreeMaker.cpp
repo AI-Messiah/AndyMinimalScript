@@ -138,11 +138,14 @@ OpNode TreeMaker::createTree(std::string text)
 			}
 		}
 	}
-	bool accepted = false;
+	bool accepted = true;
+	bool subacc;
 	for (int i = 0; i < text.length(); i++) {
+		subacc = false;
 		for (int j = 0; j < acChars.length(); j++) {
-			if (text.substr(i, 1) == acChars.substr(j, 1)) accepted = true;
+			if (text.substr(i, 1) == acChars.substr(j, 1)) subacc = true;
 		}
+		if (!subacc) accepted = false;
 	}
 	if (!accepted) {
 		ahand.report(5);
@@ -176,10 +179,7 @@ OpNode TreeMaker::createTree(std::string text)
 					pic = "~";
 				}
 				ipic = meth.asc(pic);
-				if (pic == " ") {
-
-				}
-				else if (vdet[exprnum].isAccepted(text, cntprt)) {
+				if (vdet[exprnum].isAccepted(text, cntprt)) {
 					to = cntprt;
 					if (nfset) {
 						frm = cntprt;
@@ -398,16 +398,24 @@ OpNode TreeMaker::createTree(std::string text)
 	temp.clear();
 	OpNode ret;
 	
+	accepted = true;
+	for (int i = 0; i < text.length(); i++) {
+		subacc = false;
+		for (int j = 0; j < acChars.length(); j++) {
+			if (text.substr(i, 1) == acChars.substr(j, 1)) subacc = true;
+		}
+		if (!subacc) accepted = false;
+	}
+	if (!accepted) {
+		ahand.report(5);
+	}
 	
 	if (detComma(text)) {
 		OpNode tpart;
 		for (int i = 0; i < text.length(); i++) {
 			pic = text.substr(i, 1);
 			ipic = meth.asc(pic);
-			if (pic == " ") {
-
-			}
-			else if (vdet[0].isAccepted(text, i)) {
+			if (vdet[0].isAccepted(text, i)) {
 				if (vdet[0].node) {
 					int npl = countNodes(text, i);
 					temp = nodes.at(npl);
@@ -466,10 +474,7 @@ OpNode TreeMaker::createTree(std::string text)
 		for (int i = 0; i < text.length(); i++) {
 			pic = text.substr(i, 1);
 			ipic = meth.asc(pic);
-			if (pic == " ") {
-
-			}
-			else if (vdet[0].isAccepted(text, i)) {
+			if (vdet[0].isAccepted(text, i)) {
 				if (vdet[0].node) {
 					temp = nodes.at(0);
 					isnode = true;

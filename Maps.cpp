@@ -11,7 +11,7 @@ Maps::Maps()
 	for (int i = 0; i < int(mathOps.length() / 2); i++) {
 		priority[i] = prior[i];
 		temsym = mathOps.substr(i * 2, 2);
-		if (temsym.substr(1, 1) == " ") temsym = temsym.substr(0, 1);
+		if (temsym.substr(1, 1) == " " && prior[i] < 9) temsym = temsym.substr(0, 1);
 		convertedTokens[temsym] = temp[i];
 		tempProp.type = (prior[i] < 9) ? Operator : Assignment;
 		tempProp.internal = false;

@@ -80,6 +80,8 @@ std::string ErrorHandler::getMessage(int err)
 		return "Cannot get undefined variable.";
 	case 24:
 		return "Use of reserved word.";
+	case 25:
+		return "More than one identifyer without operator.";
 	}
 	return "Unknown error";
 }

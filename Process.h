@@ -3,6 +3,13 @@
 #include "TreeMaker.h"
 #include "ResCheck.h"
 
+enum charType {
+	noChar,
+	textChar,
+	numChar,
+	operChar
+};
+
 enum lineType {
 	emptyLine,
 	varLine,
@@ -40,6 +47,7 @@ private:
 	Line newLine();
 	int findline(int linenum);
 	int findend(std::string text, int loc, int linenum);
+	std::string opers = "^*/\\+&|!=<>";
 	ResCheck res;
 	Maps amap;
 	strmeth meth;

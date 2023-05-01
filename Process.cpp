@@ -21,6 +21,8 @@ void Process::Preptext(std::string text)
 		if (pic == "\n" || pic == "\f" || pic == "\r") {
 			retcnt++;
 			if (retcnt == 1) result += "\n";
+			nfirst = false;
+			nlast = true;
 		}else{
 			if (nfirst && nlast) result += pic;
 			retcnt = 0;
@@ -41,6 +43,72 @@ void Process::Preptext(std::string text)
 			
 		}
 		closdet = (pic == "}");
+		pcnt++;
+	}
+	
+	resetlbl:
+	charType past = noChar;
+	charType pres = noChar;
+	bool spa = false;
+	bool pspa = false;
+	
+	int ipic;
+
+	int iaft;
+	int ibef;
+	std::string aft;
+	std::string bef;
+	pcnt = 0;
+	while (pcnt < result.length()) {
+		pic = result.substr(pcnt, 1);
+		ipic = meth.asc(pic);
+		aft = "";
+		if (pcnt < result.length() - 1) aft = result.substr(pcnt+ 1, 1);
+		iaft = meth.asc(aft);
+		bef = "";
+		if (pcnt > 0) bef = result.substr(pcnt - 1, 1);
+		ibef = meth.asc(bef);
+		spa = (pic == " ");
+		if (pic == "." || (ipic > 47 && ipic < 58)) {
+			pres = numChar;
+		}
+		else if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
+			if (pic == "e") {
+				if ((iaft > 64 && iaft < 91) || (iaft > 96 && iaft < 123) || (ibef > 64 && ibef < 91) || (ibef > 96 && ibef < 123)) {
+					pres = textChar;
+				}
+				else {
+					if ((iaft > 47 && iaft < 58) || aft == "-") {
+						pres = numChar;
+					}
+					else {
+						pres = operChar;
+					}
+				}
+			}
+			else {
+				pres = textChar;
+			}
+		}else if (pic == "-") {
+			if ((iaft > 64 && iaft < 91) || (iaft > 96 && iaft < 123) || (iaft > 47 && iaft < 58) || aft == ".") {
+				if (iaft > 60) {
+					pres = textChar;
+				}else{
+					pres = numChar;
+				}
+			}else{
+				pres = operChar;			
+			}
+		}else {
+			pres = noChar;
+			for (int i = 0; i < opers.length(); i++) if (pic == opers.substr(i, 1)) pres = operChar;
+		}
+		if (past != noChar && pres != noChar && past != pres && !pspa) {
+			result = meth.insertSpa(result, pcnt);
+			goto resetlbl;
+		}
+		pspa = spa;
+		past = pres;
 		pcnt++;
 	}
 	convert(result);
@@ -197,8 +265,11 @@ void Process::convert(std::string text)
 				
 				if (holdWord == defLine && pic == "=") setval = true;				
 				if (holdWord == funLine) {
-					for (int i = 0; i < amap.asdOps.length() / 2; i++) {
-						std::string cmp = amap.asdOps.substr(i * 2, 2);
+					if (pic == "=") {
+						int non = 0;
+					}
+					for (int j = 0; j < amap.asdOps.length() / 2; j++) {
+						std::string cmp = amap.asdOps.substr(j * 2, 2);
 							
 						std::string pic1 = "";
 						if (i < linetext.length() - 1) pic1 = linetext.substr(i + 1,1);						

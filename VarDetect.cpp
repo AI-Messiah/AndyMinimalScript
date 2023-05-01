@@ -16,27 +16,34 @@ bool VarDetect::isAccepted(std::string text, int pla)
     std::string bef = "";
     if (pla > 0) bef = text.substr(pla - 1, 1);
     int ibef = meth.asc(bef);
-    if (pic == "-") {
-        if ((iaft > 64 && iaft < 91) || (iaft > 96 && iaft < 123) || (ipic > 47 && ipic < 58) || pic == ".") {
+    if (pic == " ") {
+        if (hasiden) hasspa = true;
+        return true;
+    }else if (pic == "-") {
+        if ((iaft > 64 && iaft < 91) || (iaft > 96 && iaft < 123) || (iaft > 47 && iaft < 58) || aft == ".") {
             if (hase) {
                 expneg = true;
             }else {
                 neg = true;
             }
+            haniden();
             return true;
         }else{
             return false;
         }
-    }
-    if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
+    }else if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
         if (pic == "e") {
             if ((iaft> 64 && iaft < 91) || (iaft > 96 && iaft < 123) || (ibef > 64 && ibef < 91) || (ibef > 96 && ibef < 123)) {
                 varnam += pic;
                 type = typeVar;
+
+                haniden();
                 return true;
             }else{
                 if ((iaft > 47 && iaft < 58) || aft == "-") {
                     hase = true;
+                    haniden();
+                    return true;
                 }else{
                     ahand.report(17);
                 }
@@ -45,6 +52,7 @@ bool VarDetect::isAccepted(std::string text, int pla)
         else {
             varnam += pic;
             type = typeVar;
+            haniden();
             return true;
         }        
     }else if (pic == "." || (ipic > 47 && ipic < 58)) {
@@ -52,6 +60,7 @@ bool VarDetect::isAccepted(std::string text, int pla)
             if (decimal) {
                 ahand.report(16);
             }
+            haniden();
             decimal = true;
             return true;
         }else{
@@ -70,11 +79,13 @@ bool VarDetect::isAccepted(std::string text, int pla)
                     val += ipic - 48;
                 }
             }
+            haniden();
             return true;
         }
     }
     else if (pic == "#") {
         type = typeNode;
+        haniden();
         return true;
     }
     
@@ -93,6 +104,8 @@ void VarDetect::clear()
     exp = 0;
     val = 0;
     node = false;
+    hasiden = false;
+    hasspa = false;
 }
 
 varinc VarDetect::getVal()
@@ -116,6 +129,12 @@ double VarDetect::getNum()
         ret = 0;
     }
     return ret;
+}
+
+void VarDetect::haniden()
+{
+    if (hasspa) ahand.report(25);
+    hasiden = true;
 }
 
 

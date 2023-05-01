@@ -23,7 +23,10 @@ public:
 	valType type = typeNone;
 	double val = 0;
 	bool node = false;
-private:	
+private:
+	void haniden();
+	bool hasiden = false;
+	bool hasspa = false;
 	bool decimal = false;
 	bool numneg = false;
 	bool expneg = false;

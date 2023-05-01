@@ -13,6 +13,7 @@ private:
 	
 	VarDetect vdet[2];
 	std::string acChars = ",-.0123456789#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ^*/\\+&|!=<>";
+	std::string acChars1 = ",-.0123456789#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 	strmeth meth;
 	Maps smp;
 	OpNode combvar(OpNode inod, varinc var);

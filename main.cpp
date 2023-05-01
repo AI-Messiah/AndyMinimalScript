@@ -36,7 +36,7 @@ double testfun(vector<double> inp) {
 }
 
 int main(){
-	ifstream in("source4.txt");
+	ifstream in("source2.txt");
 	string text;
 	string line;
 	while (getline(in, line)) {
