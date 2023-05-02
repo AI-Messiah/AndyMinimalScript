@@ -12,10 +12,17 @@ namespace AndyInt {
 		info.errMes = getMessage(errNum);
 		info.errLine = curline;
 		info.lineText = line;
-		errors.push_back(info);
-		if (reponce) {
-			handler(errors);
-			errors.clear();
+		bool differ = true;
+		for (int i = errors.size() - 1; i > -1; i--) {
+			if (curline != errors.at(i).errLine) break;
+			if (errNum == errors.at(i).errType) differ = false;
+		}
+		if (differ) {
+			errors.push_back(info);
+			if (reponce) {
+				handler(errors);
+				errors.clear();
+			}
 		}
 	}
 
