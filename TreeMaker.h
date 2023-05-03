@@ -12,7 +12,7 @@ namespace AndyInt {
 		OpNode createTree(std::string text);
 	private:
 
-		VarDetect vdet[2];
+		
 		std::string acChars = ",-.0123456789#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ^*/\\+&|!=<>";
 		std::string acChars1 = ",-.0123456789#abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 		strmeth meth;

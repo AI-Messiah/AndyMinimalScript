@@ -2,10 +2,12 @@
 namespace AndyInt {
 	OpNode TreeMaker::createTree(std::string text)
 	{
+		VarDetect vdet[2];
 		std::vector<OpNode> nodes;
 		OpNode temp;
+		OpNode temp1;
 		if (text == "") {
-			ahand.report(3);
+			//ahand.report(3);
 			return temp;
 		}
 		double num1;
@@ -67,79 +69,94 @@ namespace AndyInt {
 						frm = -1;
 					}
 				}
-				else if (vdet[0].isAccepted(text, cntprt)) {
-					incon = false;
-					if (cntch) {
-
-						for (int i = 0; i < 16; i++) if (vdet[0].varnam == trans.oFunNames[i]) {
-							fundet = i;
-							break;
-						}
-						for (int i = 0; i < trans.funNames.size(); i++) if (vdet[0].varnam == trans.funNames.at(i)) {
-							fundet = i + 16;
-							break;
-						}
+				else if (cntch){
+					if (vdet[0].isAccepted(text, cntprt)) {
+						incon = false;
 						if (frm < 0) frm = cntprt;
+						
 					}
 				}
 				cntprt++;
 			}
 			temp = createTree(text.substr(frm2 + 1, cntprt - frm2 - 1));
-			if (fundet > 15) {
-				temp = combfun(temp, fundet - 16, vdet[0].neg, false);
-				text = meth.emplace(text, frm, cntprt);
-				npl = countNodes(text, frm);
-				nodes.insert(nodes.begin() + npl, temp);
-			}
-			else {
-				if (temp.Src.size() < 2 && temp.Src.at(0) == valValue) {
-					if (vdet[0].type == typeVar) {
-						if (fundet > -1) {
-							if (fundet < 14) {
-								double num = temp.Val.at(0);
-								num = trans.calFun(fundet, num);
-								std::string rep = fromNum(num);
-								text = meth.RepText(text, rep, frm, cntprt);
-							}
-
-							else {
-								//report error
-							}
-						}
-						else {
-							temp.Src.at(0) = valFixed;
+			temp1.clear();
+			switch (vdet[0].type) {
+			case typeVar:
+				switch (temp.Src.size()) {
+				case 0:
+					ahand.report(32);
+					break;
+				case 1:
+					temp = combvar(temp, vdet[0].getVal());
+					text = meth.emplace(text, frm, cntprt + 1);
+					npl = countNodes(text, frm);
+					nodes.insert(nodes.begin() + npl, temp);
+				default:
+					ahand.report(36);
+					break;
+				}
+				break;
+			case typeIntern:
+				switch (temp.Src.size()) {
+				case 0:
+					if (vdet[0].funval < 14) {
+						ahand.report(32);
+					}else{
+						
+						temp1.Src.push_back(valInternal);
+						text = meth.emplace(text, frm, cntprt);
+						npl = countNodes(text, frm);
+						nodes.insert(nodes.begin() + npl, temp1);
+					}
+					break;
+				case 1:
+					if (vdet[0].funval < 14) {
+						if (temp.Src.at(0) == valValue) {
+							double num = temp.Val.at(0);
+							num = trans.calFun(fundet, num);
+							std::string rep = fromNum(num);
+							text = meth.RepText(text, rep, frm, cntprt);
+						}else{
+							temp = combfun(temp, vdet[0].funval, vdet[0].neg, true);
 							text = meth.emplace(text, frm, cntprt);
 							npl = countNodes(text, frm);
 							nodes.insert(nodes.begin() + npl, temp);
 						}
+						
+					}else{
+						ahand.report(30);
 					}
-					else {
+					break;
+				default:
+					ahand.report(31);
+					break;
+				}
+				break;
+			case typeExtern:
+				temp = combfun(temp, vdet[0].funval - 16, vdet[0].neg, false);
+				text = meth.emplace(text, frm, cntprt);
+				npl = countNodes(text, frm);
+				nodes.insert(nodes.begin() + npl, temp);
+				break;
+			case typeNone:
+				if (temp.Src.size() > 0) {
+					if (temp.Src.at(0) == valValue) {
 						double num = temp.Val.at(0);
-
 						std::string rep = fromNum(num);
 						text = meth.RepText(text, rep, frm, cntprt);
-					}
-				}
-				else {
-					if (vdet[0].type == typeVar) {
-
-						temp = combvar(temp, vdet[0].getVal());
-						if (fundet > -1) {
-							temp.Src.at(0) = valInternal;
-						}
-						else {
-							temp.Src.at(0) = valIndexed;
-						}
-						text = meth.emplace(text, frm, cntprt + 1);
-						npl = countNodes(text, frm);
-						nodes.insert(nodes.begin() + npl, temp);
-					}
-					else {
+					}else{
 						text = meth.emplace(text, frm, cntprt);
 						npl = countNodes(text, frm);
 						nodes.insert(nodes.begin() + npl, temp);
 					}
+				}else{
+					ahand.report(34);
 				}
+				break;
+			default:
+				if (temp.Src.size() == 0) ahand.report(34);
+				ahand.report(35);
+				break;
 			}
 		}
 		bool accepted = true;
@@ -236,8 +253,8 @@ namespace AndyInt {
 								goto resetlbl1;
 							}
 							else if (sid == 1) {
-								vtype1 = vdet[0].type;
-								vtype2 = vdet[1].type;
+								vtype1 = vdet[0].type1;
+								vtype2 = vdet[1].type1;
 								if (vtype1 == typeNum) num1 = vdet[0].getNum();
 								if (vtype2 == typeNum) num2 = vdet[1].getNum();
 								if (vtype1 == typeNode) {
@@ -436,7 +453,7 @@ namespace AndyInt {
 
 					}
 					else {
-						if (vdet[0].type = typeVar) {
+						if (vdet[0].type == typeVar) {
 							tpart.Src.push_back(valVar);
 							tpart.Var.push_back(vdet[0].getVal());
 						}

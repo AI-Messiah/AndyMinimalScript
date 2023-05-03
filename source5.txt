@@ -1,0 +1,4 @@
+def vara = 1.2
+def varb
+varb = sin(vara)
+print(varb)

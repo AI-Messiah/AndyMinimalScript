@@ -1,4 +1,5 @@
 #include "VarDetect.h"
+#pragma STDC FENV_ACCESS on
 namespace AndyInt {
     bool VarDetect::isAccepted(std::string text, int pla)
     {
@@ -38,15 +39,13 @@ namespace AndyInt {
         else if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
             if (pic == "e") {
                 if ((iaft > 64 && iaft < 91) || (iaft > 96 && iaft < 123) || (ibef > 64 && ibef < 91) || (ibef > 96 && ibef < 123)) {
-                    varnam += pic;
-                    type = typeVar;
-
-                    haniden();
+                    hantext(pic);
                     return true;
                 }
                 else {
                     if ((iaft > 47 && iaft < 58) || aft == "-") {
                         hase = true;
+                        changType();
                         haniden();
                         return true;
                     }
@@ -56,9 +55,7 @@ namespace AndyInt {
                 }
             }
             else {
-                varnam += pic;
-                type = typeVar;
-                haniden();
+                hantext(pic);
                 return true;
             }
         }
@@ -67,6 +64,7 @@ namespace AndyInt {
                 if (decimal) {
                     ahand.report(16);
                 }
+                changType();
                 haniden();
                 decimal = true;
                 return true;
@@ -87,12 +85,14 @@ namespace AndyInt {
                         val += ipic - 48;
                     }
                 }
+                changType();
                 haniden();
                 return true;
             }
         }
         else if (pic == "#") {
             type = typeNode;
+            changType();
             haniden();
             return true;
         }
@@ -114,6 +114,8 @@ namespace AndyInt {
         node = false;
         hasiden = false;
         hasspa = false;
+        type = typeNone;
+        type1 == typeNone;
     }
 
     varinc VarDetect::getVal()
@@ -129,19 +131,43 @@ namespace AndyInt {
         if (numneg) val = -val;
         if (expneg) exp = -exp;
         double ret;
-        try {
-            ret = val * pow(10, exp);
-        }
-        catch (_exception e) {
-            ahand.report(18);
-            ret = 0;
+        std::feclearexcept(FE_ALL_EXCEPT);
+        ret = val * pow(10, exp);
+        if (std::fetestexcept(FE_OVERFLOW)) {
+            ahand.report(29);
+            return 0;
         }
         return ret;
+    }
+
+    void VarDetect::hantext(std::string aprt)
+    {
+        varnam += aprt;
+        type = typeVar;
+        funval = -1;
+        for (int i = 0; i < 16; i++) {
+            if (trans.oFunNames[i] == varnam) {
+                type = typeIntern;
+                funval = i;
+                break;
+            }
+        }
+        for (int i = 0; i < trans.funNames.size(); i++) if (varnam == trans.funNames.at(i)) {
+            type = typeExtern;
+            funval = i + 16;
+            break;
+        }
+        type1 = (type == typeExtern || type == typeIntern) ? typeFunc : typeVar;
+        haniden();
     }
 
     void VarDetect::haniden()
     {
         if (hasspa) ahand.report(25);
         hasiden = true;
+    }
+    void VarDetect::changType()
+    {
+        type1 = type;
     }
 }

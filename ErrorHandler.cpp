@@ -38,7 +38,7 @@ namespace AndyInt {
 	{
 		switch (err) {
 		case 0:
-			return "Math error.";
+			return "Devide by zero.";
 		case 1:
 			return "Could not find end of block.";
 		case 2:
@@ -89,6 +89,28 @@ namespace AndyInt {
 			return "Use of reserved word.";
 		case 25:
 			return "More than one identifyer without operator.";
+		case 26:
+			return "Invalid math Operation.";
+		case 27:
+			return "Math overflow error.";
+		case 28:
+			return "Math underflow error.";
+		case 29:
+			return "Number out of range.";
+		case 30:
+			return "Random functions do not take arguments.";
+		case 31:
+			return "An internal function does not take more than one argument.";
+		case 32:
+			return "No arguments detected.";
+		case 33:
+			return "Bit comparisons use integers between 0 and 2 ^ 64 - 1";
+		case 34:
+			return "A math expression should have something between parentheses";
+		case 35:
+			return "Expression in parentheses relates to what?";
+		case 36:
+			return "Variables only have one index.";
 		}
 		return "Unknown error";
 	}

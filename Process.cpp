@@ -1,5 +1,8 @@
 #include "Process.h"
 
+
+
+
 Process::Process()
 {
 	std::string mnames[] = {"def", "if", "else", "while", "goto", "exit"};
@@ -111,7 +114,11 @@ void Process::Preptext(std::string text)
 		past = pres;
 		pcnt++;
 	}
+	
+	
 	convert(result);
+	
+	
 }
 
 void Process::convert(std::string text)
@@ -388,6 +395,14 @@ void Process::convert(std::string text)
 	Run();
 }
 
+void Process::shutDown()
+{
+	std::mutex mut;
+	mut.lock();
+	contrun = false;
+	mut.unlock();
+}
+
 void Process::Run()
 {	
 	int linenum = 0;
@@ -396,7 +411,7 @@ void Process::Run()
 	AndyInt::tokenName tok;
 	bool hasval;
 	bool skip = false;
-	while (linenum < lines.size()) {
+	while (linenum < lines.size() && contrun) {
 		if (AndyInt::ahand.beenReported) return;
 		AndyInt::ahand.line = textlines.at(linenum);
 		AndyInt::ahand.curline = linenum + 1;

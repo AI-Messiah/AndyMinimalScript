@@ -2,6 +2,7 @@
 #include "ascii.h"
 #include "TreeMaker.h"
 #include "ResCheck.h"
+#include <mutex>
 
 enum charType {
 	noChar,
@@ -40,13 +41,17 @@ public:
 	Process();
 	void Preptext(std::string text);
 	void convert(std::string text);
-	std::map<std::string, lineType> match;
+	void shutDown();
+	
 	AndyInt::TreeMaker maker;
 private:
+	
 	void Run();
 	Line newLine();
 	int findline(int linenum);
 	int findend(std::string text, int loc, int linenum);
+	bool contrun = true;
+	std::map<std::string, lineType> match;
 	std::string opers = "^*/\\+&|!=<>";
 	AndyInt::ResCheck res;
 	AndyInt::Maps amap;

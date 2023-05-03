@@ -1,6 +1,11 @@
 #pragma once
 #include <cmath>
+#include <cstdint>
 #include "Variables.h"
+
+#include <cerrno>
+#include <cfenv>
+
 namespace AndyInt {
 	enum tokenName {
 		opNone,

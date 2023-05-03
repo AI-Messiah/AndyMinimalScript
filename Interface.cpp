@@ -16,6 +16,11 @@ void Interface::setErrorHandler(std::function<void(std::vector<errInfo>)> ahan)
 	AndyInt::ahand.setHandler(ahan);
 }
 
+void Interface::shutdown()
+{
+	proc.shutDown();
+}
+
 AndyInt::OpNode Interface::debugTree(std::string text)
 {
 	return proc.maker.createTree(text);
