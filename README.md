@@ -6,6 +6,8 @@
 
 	This is a simple scripting language written by Carle Banning it was created in an unconventional way yet it is amazingly simple. Instead of using a lexer and a parser it constructs the abstract syntax tree from extracting the arguments using string methods and placing a character in the string to represent that a node has been created and joining the nodes together. The tree is created from the bottom up and the trees evaluate themselves, when they are needed. The lines are represented by a type of struct that contains its type, 2 trees and their relation to each other and where to go next on a condition or automatically.
 	It only has one data type (number the equivalent of double) which supports arrays and only has the required reserved words. All values except 0 are treated as true and boolean operations return 0 for false and 1 for true. It has no support for creating your own internal functions.
+	
+This manual is written for people who have some experience with programming I will write a beginners manual later.
 
 I thought I would include a main file and a script. These are easy to delete when you use this yourself.
 
@@ -57,8 +59,8 @@ The order of operations are.
 ^ - exponents.
 * / \ - multiply, devide, float modular.
 + - - add, subtract.
-& - bit and – limited to 64 bit integers.
-| - bit or – limited to 64 bit integers.
+& - bit and – limited to 64 bit unsigned integers.
+| - bit or – limited to 64 bit unsigned integers.
 > < == != >= <= greater, less, equal, not equal, greater or equal, less or equal.
 ! logical not.
 && logical and.
