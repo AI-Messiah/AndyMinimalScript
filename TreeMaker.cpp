@@ -34,6 +34,7 @@ namespace AndyInt {
 		int fundet;
 		int nodepl1, nodepl2;
 		valType vtype1, vtype2;
+		int ufnd;
 		int parcnt = 0;
 		for (int i = 0; i < text.length(); i++) {
 			if (text.substr(i, 1) == "(") parcnt++;
@@ -189,7 +190,7 @@ namespace AndyInt {
 				dplas1 = 0;
 				dplas2 = 0;
 				nodref = 0;
-
+				ufnd = -1;
 				frm1 = -1;
 
 				temp.clear();
@@ -245,130 +246,192 @@ namespace AndyInt {
 					}
 					else {
 						if (curtok != opNone) {
-							if (vdet[0].type == typeNum && vdet[1].type == typeNum) {
-								num1 = vdet[0].getNum();
-								num2 = vdet[1].getNum();
-								std::string rep = fromNum(calc.Calculate(num1, num2, curtok));
-								text = meth.RepText(text, rep, frm, to + 1);
-								goto resetlbl1;
-							}
-							else if (sid == 1) {
-								vtype1 = vdet[0].type1;
-								vtype2 = vdet[1].type1;
-								if (vtype1 == typeNum) num1 = vdet[0].getNum();
-								if (vtype2 == typeNum) num2 = vdet[1].getNum();
-								if (vtype1 == typeNode) {
-									if ((nodes.at(nodepl1).Src.at(0) == valInternal && nodes.at(nodepl1).Src.size() < 2) || (nodes.at(nodepl1).Src.at(0) == valExternal && nodes.at(nodepl1).Src.size() < 2)) {
-										vtype1 = typeFunc;
+
+							if (curtok == opInvert) {
+								if (vdet[1].type == typeNum) {
+									num2 = vdet[1].getNum();
+									std::string rep;
+									if (vdet[1].Uord) {
+										rep = (num2 != 0) ? "-1" : "0";
+									}else{
+										rep = (num2 != 0) ? "1" : "0";
 									}
-									else {
-										vtype1 = typeNode;
-									}
-								}
-								else {
-									if (vtype1 == typeNone) ahand.report(6);
-								}
-								if (vtype2 == typeNode) {
-									if ((nodes.at(nodepl2).Src.at(0) == valInternal && nodes.at(nodepl2).Src.size() < 2) || (nodes.at(nodepl2).Src.at(0) == valExternal && nodes.at(nodepl2).Src.size() < 2)) {
-										vtype2 = typeFunc;
-									}
-									else {
-										vtype2 = typeNode;
-									}
-								}
-								else {
-									if (vtype2 == typeNone) ahand.report(6);
-								}
-								if (vtype1 != typeNone && vtype2 != typeNone) {
-									nodref = countNodes(text, cntprt);
-									switch (vtype1) {
-									case typeNum:
-										switch (vtype2) {
-										case typeVar:
-											temp = numwithvar(num1, vdet[0].getVal(), curtok);
-											nodes.insert(nodes.begin() + nodref, temp);
-											break;
-										case typeFunc:
-											temp = numwithfunc(num1, nodes.at(nodref), curtok);
-											nodes.at(nodref) = temp;
-											break;
-										case typeNode:
-											temp = numwithnode(num1, nodes.at(nodref), curtok);
-											nodes.at(nodref) = temp;
-											break;
+									text = meth.RepText(text, rep, frm, to + 1);
+									goto resetlbl1;
+								}else if (sid == 1) {
+									vtype2 = vdet[1].type1;
+									OpNode nod;
+									if (vtype2 == typeNode) {
+										if ((nodes.at(nodepl2).Src.at(0) == valInternal && nodes.at(nodepl2).Src.size() < 2) || (nodes.at(nodepl2).Src.at(0) == valExternal && nodes.at(nodepl2).Src.size() < 2)) {
+											vtype2 = typeFunc;
 										}
-										break;
+										else {
+											vtype2 = typeNode;
+										}
+										nodref = countNodes(text, cntprt);
+										nod = nodes.at(nodref);
+									}
+									else {
+										if (vtype2 == typeNone) ahand.report(6);
+									}
+									
+									
+									temp.clear();
+									switch (vtype2) {
 									case typeVar:
-										switch (vtype2) {
-										case typeNum:
-											temp = varwithnum(vdet[0].getVal(), num2, curtok);
-											nodes.insert(nodes.begin() + nodref, temp);
-											break;
-										case typeVar:
-											temp = varwithvar(vdet[0].getVal(), vdet[1].getVal(), curtok);
-											nodes.insert(nodes.begin() + nodref, temp);
-											break;
-										case typeFunc:
-											temp = varwithfunc(vdet[0].getVal(), nodes.at(nodref), curtok);
-											nodes.at(nodref) = temp;
-											break;
-										case typeNode:
-											temp = varwithnode(vdet[0].getVal(), nodes.at(nodref), curtok);
-											nodes.at(nodref) = temp;
-											break;
-										}
+										temp.Src.push_back(valVar);
+										temp.Var.push_back(vdet[1].getVal());
+										temp.oper = opInvert;
+										temp.Uord.push_back(vdet[1].Uord);
+										nodes.insert(nodes.begin() + nodref, temp);
+										text = meth.emplace(text, ufnd, to + 1);
 										break;
 									case typeFunc:
-										switch (vtype2) {
-										case typeNum:
-											temp = funcwithval(nodes.at(nodref), num2, curtok);
-											nodes.at(nodref) = temp;
-											break;
-										case typeVar:
-											temp = funcwithvar(nodes.at(nodref), vdet[1].getVal(), curtok);
-											nodes.at(nodref) = temp;
-											break;
-										case typeFunc:
-											temp = funcwithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-											nodes.at(nodref - 1) = temp;
-											nodes.erase(nodes.begin() + nodref);
-											break;
-										case typeNode:
-											temp = funcwithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-											nodes.at(nodref - 1) = temp;
-											nodes.erase(nodes.begin() + nodref);
-											break;
-										}
+										temp.Uord.push_back(vdet[1].Uord);
+										temp.Src.push_back(nod.Src.at(0));
+										temp.Var.push_back(nod.Var.at(0));
+										temp.nodes.push_back(nod.nodes.at(0));
+										temp.oper = opInvert;
+										nodes.at(nodref) = temp;
+										text = meth.elimchar(text, ufnd);
 										break;
 									case typeNode:
-										switch (vtype2) {
-										case typeNum:
-											temp = nodewithnum(nodes.at(nodref), num2, curtok);
-											nodes.at(nodref) = temp;
-											break;
-										case typeVar:
-											temp = nodewithvar(nodes.at(nodref), vdet[1].getVal(), curtok);
-											nodes.at(nodref) = temp;
-											break;
-										case typeFunc:
-											temp = nodewithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-											nodes.at(nodref - 1) = temp;
-											nodes.erase(nodes.begin() + nodref);
-											break;
-										case typeNode:
-											temp = nodewithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
-											nodes.at(nodref - 1) = temp;
-											nodes.erase(nodes.begin() + nodref);
-											break;
-										}
+										temp.Uord.push_back(vdet[1].Uord);
+										temp.Src.push_back(valNode);										
+										temp.nodes.push_back(nod);
+										temp.oper = opInvert;
+										nodes.at(nodref) = temp;
+										text = meth.elimchar(text, ufnd);
 										break;
 									}
-									text = meth.emplace(text, frm, to + 1);
 									goto resetlbl1;
 								}
-								else {
-									ahand.report(14);
-									return temp;
+							}else{
+								if (vdet[0].type == typeNum && vdet[1].type == typeNum) {
+									num1 = vdet[0].getNum();
+									num2 = vdet[1].getNum();
+									std::string rep = fromNum(calc.Calculate(num1, num2, curtok));
+									text = meth.RepText(text, rep, frm, to + 1);
+									goto resetlbl1;
+								}
+								else if (sid == 1) {
+									vtype1 = vdet[0].type1;
+									vtype2 = vdet[1].type1;
+									if (vtype1 == typeNum) num1 = vdet[0].getNum();
+									if (vtype2 == typeNum) num2 = vdet[1].getNum();
+									if (vtype1 == typeNode) {
+										if ((nodes.at(nodepl1).Src.at(0) == valInternal && nodes.at(nodepl1).Src.size() < 2) || (nodes.at(nodepl1).Src.at(0) == valExternal && nodes.at(nodepl1).Src.size() < 2)) {
+											vtype1 = typeFunc;
+										}
+										else {
+											vtype1 = typeNode;
+										}
+									}
+									else {
+										if (vtype1 == typeNone) ahand.report(6);
+									}
+									if (vtype2 == typeNode) {
+										if ((nodes.at(nodepl2).Src.at(0) == valInternal && nodes.at(nodepl2).Src.size() < 2) || (nodes.at(nodepl2).Src.at(0) == valExternal && nodes.at(nodepl2).Src.size() < 2)) {
+											vtype2 = typeFunc;
+										}
+										else {
+											vtype2 = typeNode;
+										}
+									}
+									else {
+										if (vtype2 == typeNone) ahand.report(6);
+									}
+									if (vtype1 != typeNone && vtype2 != typeNone) {
+										nodref = countNodes(text, cntprt);
+										switch (vtype1) {
+										case typeNum:
+											switch (vtype2) {
+											case typeVar:
+												temp = numwithvar(num1, vdet[0].getVal(), curtok);
+												nodes.insert(nodes.begin() + nodref, temp);
+												break;
+											case typeFunc:
+												temp = numwithfunc(num1, nodes.at(nodref), curtok);
+												nodes.at(nodref) = temp;
+												break;
+											case typeNode:
+												temp = numwithnode(num1, nodes.at(nodref), curtok);
+												nodes.at(nodref) = temp;
+												break;
+											}
+											break;
+										case typeVar:
+											switch (vtype2) {
+											case typeNum:
+												temp = varwithnum(vdet[0].getVal(), num2, curtok);
+												nodes.insert(nodes.begin() + nodref, temp);
+												break;
+											case typeVar:
+												temp = varwithvar(vdet[0].getVal(), vdet[1].getVal(), curtok);
+												nodes.insert(nodes.begin() + nodref, temp);
+												break;
+											case typeFunc:
+												temp = varwithfunc(vdet[0].getVal(), nodes.at(nodref), curtok);
+												nodes.at(nodref) = temp;
+												break;
+											case typeNode:
+												temp = varwithnode(vdet[0].getVal(), nodes.at(nodref), curtok);
+												nodes.at(nodref) = temp;
+												break;
+											}
+											break;
+										case typeFunc:
+											switch (vtype2) {
+											case typeNum:
+												temp = funcwithval(nodes.at(nodref), num2, curtok);
+												nodes.at(nodref) = temp;
+												break;
+											case typeVar:
+												temp = funcwithvar(nodes.at(nodref), vdet[1].getVal(), curtok);
+												nodes.at(nodref) = temp;
+												break;
+											case typeFunc:
+												temp = funcwithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
+												nodes.at(nodref - 1) = temp;
+												nodes.erase(nodes.begin() + nodref);
+												break;
+											case typeNode:
+												temp = funcwithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
+												nodes.at(nodref - 1) = temp;
+												nodes.erase(nodes.begin() + nodref);
+												break;
+											}
+											break;
+										case typeNode:
+											switch (vtype2) {
+											case typeNum:
+												temp = nodewithnum(nodes.at(nodref), num2, curtok);
+												nodes.at(nodref) = temp;
+												break;
+											case typeVar:
+												temp = nodewithvar(nodes.at(nodref), vdet[1].getVal(), curtok);
+												nodes.at(nodref) = temp;
+												break;
+											case typeFunc:
+												temp = nodewithfunc(nodes.at(nodref - 1), nodes.at(nodref), curtok);
+												nodes.at(nodref - 1) = temp;
+												nodes.erase(nodes.begin() + nodref);
+												break;
+											case typeNode:
+												temp = nodewithnode(nodes.at(nodref - 1), nodes.at(nodref), curtok);
+												nodes.at(nodref - 1) = temp;
+												nodes.erase(nodes.begin() + nodref);
+												break;
+											}
+											break;
+										}
+										text = meth.emplace(text, frm, to + 1);
+										goto resetlbl1;
+									}
+									else {
+										ahand.report(14);
+										return temp;
+									}
 								}
 							}
 						}
@@ -380,6 +443,7 @@ namespace AndyInt {
 									if (temsym.length() == 1) {
 										if (temsym == pic) {
 											curtok = smp.convertedTokens[pic];
+											if (curtok == opInvert) ufnd = cntprt;
 										}
 									}
 									else {

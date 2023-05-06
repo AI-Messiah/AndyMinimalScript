@@ -1,0 +1,7 @@
+def vara = 0
+def varb = 0
+while(vara < 10){
+varb = !varb
+print(varb)
+vara += 1
+}

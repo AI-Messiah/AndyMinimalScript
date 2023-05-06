@@ -29,15 +29,19 @@ namespace AndyInt {
 
 				break;
 			case valVar:
-				if (fside == 0) {
-					val1 = vars.Get(Var.at(varcnt).num, 0);
-					if (Var.at(varcnt).neg) val1 *= -1;
+				if (oper == opInvert) {
+					val1 = vars.Get(Var.at(0).num, 0);
+					return (val1 != 0) ? 0 : 1;
+				}else{
+					if (fside == 0) {
+						val1 = vars.Get(Var.at(varcnt).num, 0);
+						if (Var.at(varcnt).neg) val1 *= -1;
+					}else{
+						val2 = vars.Get(Var.at(varcnt).num, 0);
+						if (Var.at(varcnt).neg) val2 *= -1;
+					}
+					varcnt++;
 				}
-				else {
-					val2 = vars.Get(Var.at(varcnt).num, 0);
-					if (Var.at(varcnt).neg) val2 *= -1;
-				}
-				varcnt++;
 				break;
 			case valValue:
 				if (fside == 0) {
@@ -49,60 +53,81 @@ namespace AndyInt {
 				numcnt++;
 				break;
 			case valNode:
-				if (fside == 0) {
-					val1 = nodes.at(nodcnt).evaluate();
+				if (oper == opInvert) {
+					val1 = nodes.at(0).evaluate();
+					return (val1 != 0) ? 0 : 1;
+				}else {
+					if (fside == 0) {
+						val1 = nodes.at(nodcnt).evaluate();
+					}
+					else {
+						val2 = nodes.at(nodcnt).evaluate();
+					}
+					nodcnt++;
 				}
-				else {
-					val2 = nodes.at(nodcnt).evaluate();
-				}
-				nodcnt++;
 				break;
 			case valIndexed:
-				if (fside == 0) {
-					nval1 = nodes.at(nodcnt).evaluate();
-					val1 = vars.Get(Var.at(varcnt).num, nval1);
-					if (Var.at(varcnt).neg) val1 *= -1;
+				if (oper == opInvert) {
+					nval1 = nodes.at(0).evaluate();
+					val1 = vars.Get(Var.at(0).num, nval1);
+					return (val1 != 0) ? 0 : 1;
+				}else{
+					if (fside == 0) {
+						nval1 = nodes.at(nodcnt).evaluate();
+						val1 = vars.Get(Var.at(varcnt).num, nval1);
+						if (Var.at(varcnt).neg) val1 *= -1;
+					}else{
+						nval2 = nodes.at(nodcnt).evaluate();
+						val2 = vars.Get(Var.at(varcnt).num, nval2);
+						if (Var.at(varcnt).neg) val2 *= -1;
+					}
+					nodcnt++;
+					varcnt++;
 				}
-				else {
-					nval2 = nodes.at(nodcnt).evaluate();
-					val2 = vars.Get(Var.at(varcnt).num, nval2);
-					if (Var.at(varcnt).neg) val2 *= -1;
-				}
-				nodcnt++;
-				varcnt++;
 				break;
 			case valFixed:
-				if (fside == 0) {
-					nval1 = Val.at(varcnt);
-					val1 = vars.Get(Var.at(varcnt).num, nval1);
-					if (Var.at(varcnt).neg) val1 *= -1;
+				if (oper == opInvert) {
+					nval1 = Val.at(0);
+					val1 = vars.Get(Var.at(0).num, nval1);
+					return (val1 != 0) ? 0 : 1;
+				}else{
+					if (fside == 0) {
+						nval1 = Val.at(varcnt);
+						val1 = vars.Get(Var.at(varcnt).num, nval1);
+						if (Var.at(varcnt).neg) val1 *= -1;
+					}else{
+						nval2 = Val.at(varcnt);
+						val2 = vars.Get(Var.at(varcnt).num, nval2);
+						if (Var.at(varcnt).neg) val2 *= -1;
+					}
+					numcnt++;
+					varcnt++;
 				}
-				else {
-					nval2 = Val.at(varcnt);
-					val2 = vars.Get(Var.at(varcnt).num, nval2);
-					if (Var.at(varcnt).neg) val2 *= -1;
-				}
-				numcnt++;
-				varcnt++;
 				break;
 			case valInternal:
-				if (fside == 0) {
-					nval1 = nodes.at(nodcnt).evaluate();
-					val1 = trans.calFun(Var.at(varcnt).num, nval1);
-					if (Var.at(varcnt).neg) val1 *= -1;
+				if (oper == opInvert) {
+					nval1 = nodes.at(0).evaluate();
+					val1 = trans.calFun(Var.at(0).num, nval1);
+					return (val1 != 0) ? 0 : 1;
+				}else{
+					if (fside == 0) {
+						nval1 = nodes.at(nodcnt).evaluate();
+						val1 = trans.calFun(Var.at(varcnt).num, nval1);
+						if (Var.at(varcnt).neg) val1 *= -1;
+					}
+					else {
+						nval1 = nodes.at(nodcnt).evaluate();
+						val2 = trans.calFun(Var.at(varcnt).num, nval2);
+						if (Var.at(varcnt).neg) val2 *= -1;
+					}
+					nodcnt++;
+					varcnt++;
 				}
-				else {
-					nval1 = nodes.at(nodcnt).evaluate();
-					val2 = trans.calFun(Var.at(varcnt).num, nval2);
-					if (Var.at(varcnt).neg) val2 *= -1;
-				}
-				nodcnt++;
-				varcnt++;
 				break;
 			case valExternal:
 				std::vector<double> pargs;
 				pargs.clear();
-				if (fside == 0) {
+				if (oper == opInvert) {
 					if (nodes.at(nodcnt).nodes.size() < 2) {
 
 						nval1 = nodes.at(nodcnt).evaluate();
@@ -115,21 +140,40 @@ namespace AndyInt {
 						}
 					}
 					val1 = trans.callext(Var.at(varcnt).num, pargs);
-					if (Var.at(varcnt).neg) val1 *= -1;
+					return (val1 != 0) ? 0 : 1;
+				}else{
+					if (fside == 0) {
+						if (nodes.at(nodcnt).nodes.size() < 2) {
+
+							nval1 = nodes.at(nodcnt).evaluate();
+							pargs.push_back(nval1);
+						}else{
+							for (int i = 0; i < nodes.at(nodcnt).nodes.size(); i++) {
+								nval1 = nodes.at(nodcnt).nodes.at(i).evaluate();
+								pargs.push_back(nval1);
+							}
+						}
+						val1 = trans.callext(Var.at(varcnt).num, pargs);
+						if (Var.at(varcnt).neg) val1 *= -1;
+						
+					}else{
+
+						if (nodes.at(nodcnt).nodes.size() < 2) {
+
+							nval2 = nodes.at(nodcnt).evaluate();
+							pargs.push_back(nval1);
+						}else {
+							for (int i = 0; i < nodes.at(nodcnt).nodes.size(); i++) {
+								nval2 = nodes.at(nodcnt).nodes.at(i).evaluate();
+								pargs.push_back(nval2);
+							}
+						}
+						val2 = trans.callext(Var.at(varcnt).num, pargs);
+						if (Var.at(varcnt).neg) val1 *= -1;
+					}
 					nodcnt++;
 					varcnt++;
 				}
-				else {
-
-					for (int i = 0; i < nodes.at(nodcnt).nodes.size(); i++) {
-						nval1 = nodes.at(nodcnt).nodes.at(i).evaluate();
-						pargs.push_back(nval1);
-					}
-					val2 = trans.callext(Var.at(varcnt).num, pargs);
-					if (Var.at(varcnt).neg) val2 *= -1;
-				}
-				nodcnt++;
-				varcnt++;
 				break;
 			}
 			fside++;
@@ -149,12 +193,10 @@ namespace AndyInt {
 	void OpNode::clear()
 	{
 		oper = opNone;
-
-
 		Src.clear();
 		Val.clear();
 		Var.clear();
-
+		Uord.clear();
 		nodes.clear();
 	}
 

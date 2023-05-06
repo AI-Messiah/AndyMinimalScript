@@ -36,7 +36,8 @@ namespace AndyInt {
 		std::vector<valFrom> Src;
 		std::vector<double> Val;
 		std::vector<varinc> Var;
-
+		
+		std::vector<bool> Uord;
 		std::vector<OpNode> nodes;
 	};
 }
