@@ -96,7 +96,10 @@ namespace AndyInt {
             haniden();
             return true;
         }
-
+        else if (pic == "!" && neg) {
+            Uord = true;
+        }
+        
         return false;
     }
 
@@ -114,6 +117,7 @@ namespace AndyInt {
         node = false;
         hasiden = false;
         hasspa = false;
+        Uord = false;
         type = typeNone;
         type1 == typeNone;
     }

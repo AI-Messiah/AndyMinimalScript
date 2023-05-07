@@ -29,6 +29,7 @@ namespace AndyInt {
 		valType type1 = typeNone;
 		double val = 0;
 		bool node = false;
+		bool Uord = false;
 		int funval = -1;
 	private:
 		void hantext(std::string aprt);
