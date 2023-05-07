@@ -53,4 +53,11 @@ namespace AndyInt {
 		}
 		return ret;
 	}
+	std::string strmeth::elimchar(std::string text, int place)
+	{
+		std::string ret = "";
+		ret = text.substr(0, place);
+		ret += text.substr(place + 1, text.length() - place);
+		return ret;
+	}
 }
