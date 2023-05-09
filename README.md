@@ -83,3 +83,5 @@ include the file Interface.h and create an instance of the Interface class. To s
 To run the script pass it as a string to handleScript.   
 
 There is an external shutdown method if you want to run this inside a thread. This already has a mutex in it.
+
+This Operation restructures the lines so that brackets have their own line.
