@@ -114,8 +114,10 @@ void Process::Preptext(std::string text)
 		past = pres;
 		pcnt++;
 	}
-	
-	
+	std::ofstream out("CScript.txt");
+	out << result;
+	out.close();
+
 	convert(result);
 	
 	
@@ -272,9 +274,6 @@ void Process::convert(std::string text)
 				
 				if (holdWord == defLine && pic == "=") setval = true;				
 				if (holdWord == funLine) {
-					if (pic == "=") {
-						int non = 0;
-					}
 					for (int j = 0; j < amap.asdOps.length() / 2; j++) {
 						std::string cmp = amap.asdOps.substr(j * 2, 2);
 							
@@ -416,9 +415,6 @@ void Process::Run()
 		AndyInt::ahand.line = textlines.at(linenum);
 		AndyInt::ahand.curline = linenum + 1;
 		current = lines.at(linenum);
-		if (linenum == 12) {
-			int non = 0;
-		}
 		if (current.ifend || current.whilend) {
 			linenum = current.whret;
 		}

@@ -32,11 +32,13 @@ namespace AndyInt {
 				if (oper == opInvert) {
 					val1 = vars.Get(Var.at(0).num, 0);
 					return (val1 != 0) ? 0 : 1;
-				}else{
+				}
+				else {
 					if (fside == 0) {
 						val1 = vars.Get(Var.at(varcnt).num, 0);
 						if (Var.at(varcnt).neg) val1 *= -1;
-					}else{
+					}
+					else {
 						val2 = vars.Get(Var.at(varcnt).num, 0);
 						if (Var.at(varcnt).neg) val2 *= -1;
 					}
@@ -56,7 +58,8 @@ namespace AndyInt {
 				if (oper == opInvert) {
 					val1 = nodes.at(0).evaluate();
 					return (val1 != 0) ? 0 : 1;
-				}else {
+				}
+				else {
 					if (fside == 0) {
 						val1 = nodes.at(nodcnt).evaluate();
 					}
@@ -71,12 +74,14 @@ namespace AndyInt {
 					nval1 = nodes.at(0).evaluate();
 					val1 = vars.Get(Var.at(0).num, nval1);
 					return (val1 != 0) ? 0 : 1;
-				}else{
+				}
+				else {
 					if (fside == 0) {
 						nval1 = nodes.at(nodcnt).evaluate();
 						val1 = vars.Get(Var.at(varcnt).num, nval1);
 						if (Var.at(varcnt).neg) val1 *= -1;
-					}else{
+					}
+					else {
 						nval2 = nodes.at(nodcnt).evaluate();
 						val2 = vars.Get(Var.at(varcnt).num, nval2);
 						if (Var.at(varcnt).neg) val2 *= -1;
@@ -90,12 +95,14 @@ namespace AndyInt {
 					nval1 = Val.at(0);
 					val1 = vars.Get(Var.at(0).num, nval1);
 					return (val1 != 0) ? 0 : 1;
-				}else{
+				}
+				else {
 					if (fside == 0) {
 						nval1 = Val.at(varcnt);
 						val1 = vars.Get(Var.at(varcnt).num, nval1);
 						if (Var.at(varcnt).neg) val1 *= -1;
-					}else{
+					}
+					else {
 						nval2 = Val.at(varcnt);
 						val2 = vars.Get(Var.at(varcnt).num, nval2);
 						if (Var.at(varcnt).neg) val2 *= -1;
@@ -106,17 +113,29 @@ namespace AndyInt {
 				break;
 			case valInternal:
 				if (oper == opInvert) {
-					nval1 = nodes.at(0).evaluate();
-					val1 = trans.calFun(Var.at(0).num, nval1);
+					if (nodes.at(nodcnt).nodes.size() == 0) {
+						val1 = trans.calFun(Var.at(varcnt).num, 0);
+					}else{
+						nval1 = nodes.at(nodcnt).nodes.at(0).evaluate();
+						val1 = trans.calFun(Var.at(varcnt).num, nval1);
+					}
 					return (val1 != 0) ? 0 : 1;
 				}else{
 					if (fside == 0) {
-						nval1 = nodes.at(nodcnt).evaluate();
-						val1 = trans.calFun(Var.at(varcnt).num, nval1);
+						if (nodes.at(nodcnt).nodes.size() == 0) {
+							val1 = trans.calFun(Var.at(varcnt).num, 0);
+						}else{
+							nval1 = nodes.at(nodcnt).evaluate();
+							val1 = trans.calFun(Var.at(varcnt).num, nval1);
+						}
 						if (Var.at(varcnt).neg) val1 *= -1;
-					}
-					else {
-						nval1 = nodes.at(nodcnt).evaluate();
+					}else{
+						if (nodes.at(nodcnt).nodes.size() == 0) {
+							val2 = trans.calFun(Var.at(varcnt).num, 0);
+						}else{
+							nval2 = nodes.at(nodcnt).evaluate();
+							val2 = trans.calFun(Var.at(varcnt).num, nval2);
+						}
 						val2 = trans.calFun(Var.at(varcnt).num, nval2);
 						if (Var.at(varcnt).neg) val2 *= -1;
 					}
@@ -128,12 +147,13 @@ namespace AndyInt {
 				std::vector<double> pargs;
 				pargs.clear();
 				if (oper == opInvert) {
-					if (nodes.at(nodcnt).nodes.size() < 2) {
+					if (nodes.at(nodcnt).nodes.size() == 0) {
 
-						nval1 = nodes.at(nodcnt).evaluate();
+					}else if (nodes.at(nodcnt).nodes.size() < 2) {
+
+						nval1 = nodes.at(nodcnt).nodes.at(0).evaluate();
 						pargs.push_back(nval1);
-					}
-					else {
+					}else{
 						for (int i = 0; i < nodes.at(nodcnt).nodes.size(); i++) {
 							nval1 = nodes.at(nodcnt).nodes.at(i).evaluate();
 							pargs.push_back(nval1);
@@ -141,11 +161,14 @@ namespace AndyInt {
 					}
 					val1 = trans.callext(Var.at(varcnt).num, pargs);
 					return (val1 != 0) ? 0 : 1;
-				}else{
+				}
+				else {
 					if (fside == 0) {
-						if (nodes.at(nodcnt).nodes.size() < 2) {
+						if (nodes.at(nodcnt).nodes.size() == 0) {
 
-							nval1 = nodes.at(nodcnt).evaluate();
+						}else if (nodes.at(nodcnt).nodes.size() < 2) {
+
+							nval1 = nodes.at(nodcnt).nodes.at(0).evaluate();
 							pargs.push_back(nval1);
 						}else{
 							for (int i = 0; i < nodes.at(nodcnt).nodes.size(); i++) {
@@ -153,20 +176,28 @@ namespace AndyInt {
 								pargs.push_back(nval1);
 							}
 						}
-						val1 = trans.callext(Var.at(varcnt).num, pargs);
+						if (Var.size() > 0) {
+							val1 = trans.callext(Var.at(varcnt).num, pargs);
+						}else {
+							val1 = trans.callext(nodes.at(nodcnt).Var.at(varcnt).num, pargs);
+						}
 						if (Var.at(varcnt).neg) val1 *= -1;
-						
-					}else{
 
-						if (nodes.at(nodcnt).nodes.size() < 2) {
+					}else{
+						if (nodes.at(nodcnt).nodes.size() == 0) {
+
+						}else if (nodes.at(nodcnt).nodes.size() < 2) {
 
 							nval2 = nodes.at(nodcnt).evaluate();
 							pargs.push_back(nval1);
-						}else {
+						}else{
 							for (int i = 0; i < nodes.at(nodcnt).nodes.size(); i++) {
 								nval2 = nodes.at(nodcnt).nodes.at(i).evaluate();
 								pargs.push_back(nval2);
 							}
+						}
+						if (Var.size() <= varcnt) {
+							int non = 0;
 						}
 						val2 = trans.callext(Var.at(varcnt).num, pargs);
 						if (Var.at(varcnt).neg) val1 *= -1;
@@ -193,10 +224,11 @@ namespace AndyInt {
 	void OpNode::clear()
 	{
 		oper = opNone;
+		
 		Src.clear();
 		Val.clear();
 		Var.clear();
-		Uord.clear();
+		pars.clear();
 		nodes.clear();
 	}
 
@@ -208,17 +240,40 @@ namespace AndyInt {
 			switch (Src.at(0)) {
 			case valVar:
 				prevVal = vars.SetGet(Var.at(0).num, 0);
-
 				break;
 			case valFixed:
 				par = Val.at(0);
 				prevVal = vars.SetGet(Var.at(0).num, int(par));
-
 				break;
 			case valIndexed:
 				par = nodes.at(0).evaluate();
 				prevVal = vars.SetGet(Var.at(0).num, int(par));
-
+				break;
+			case valNode:
+				if (nodes.size() > 0) {
+					if (nodes.at(0).Src.size() > 0) {
+						switch (nodes.at(0).Src.at(0)) {
+						case valVar:
+							prevVal = vars.SetGet(nodes.at(0).Var.at(0).num, 0);
+							
+							break;
+						case valFixed:
+							par = nodes.at(0).Val.at(0);
+							prevVal = vars.SetGet(nodes.at(0).Var.at(0).num, int(par));
+							
+							break;
+						case valIndexed:
+							par = nodes.at(0).nodes.at(0).evaluate();
+							prevVal = vars.SetGet(nodes.at(0).Var.at(0).num, int(par));
+							
+							break;
+						default:
+							ahand.report(20);
+							return false;
+							break;
+						}
+					}
+				}
 				break;
 			default:
 				ahand.report(20);
@@ -233,7 +288,18 @@ namespace AndyInt {
 			double fval = 0;
 			if (prevVal.defined) fval = prevVal.value;
 			fval = calc.Calculate(fval, ival, tok);
-			vars.Set(Var.at(0).num, fval, int(par));
+			if (Var.size() > 0) {
+				vars.Set(Var.at(0).num, fval, int(par));
+			}else if (nodes.size() > 0) {
+				if (nodes.at(0).Var.size() > 0) {
+					vars.Set(nodes.at(0).Var.at(0).num, fval, int(par));
+				}else{
+
+				}
+			}else{
+
+			}
+			
 			return true;
 		}
 		else if (Src.size() == 0) {

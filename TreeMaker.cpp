@@ -36,6 +36,7 @@ namespace AndyInt {
 		valType vtype1, vtype2;
 		int ufnd;
 		int parcnt = 0;
+		std::string pic1;
 		for (int i = 0; i < text.length(); i++) {
 			if (text.substr(i, 1) == "(") parcnt++;
 			if (text.substr(i, 1) == ")") parcnt--;
@@ -44,11 +45,12 @@ namespace AndyInt {
 			ahand.report(4);
 			return temp;
 		}
+	resetlbl:
 		while (hasPeren(text)) {
-		resetlbl:
 			fundet = -1;
 			cntprt = 0;
-			frm = 0;
+			frm = -1;
+			frm2 = -1;
 			incon = false;
 			vdet[0].clear();
 			cntch = true;
@@ -80,48 +82,50 @@ namespace AndyInt {
 				cntprt++;
 			}
 			temp = createTree(text.substr(frm2 + 1, cntprt - frm2 - 1));
-			temp1.clear();
+			
 			switch (vdet[0].type) {
 			case typeVar:
-				switch (temp.Src.size()) {
+				switch (temp.nodes.size()) {
 				case 0:
 					ahand.report(32);
 					break;
 				case 1:
-					temp = combvar(temp, vdet[0].getVal());
-					text = meth.emplace(text, frm, cntprt + 1);
+					temp = combvar(temp.nodes.at(0), vdet[0].getVal());					
 					npl = countNodes(text, frm);
 					nodes.insert(nodes.begin() + npl, temp);
+					text = meth.emplace(text, frm, cntprt + 1);
 				default:
 					ahand.report(36);
 					break;
 				}
 				break;
 			case typeIntern:
-				switch (temp.Src.size()) {
+				switch (temp.nodes.size()) {
 				case 0:
 					if (vdet[0].funval < 14) {
 						ahand.report(32);
 					}else{
+						OpNode anul;
+						temp = combfun(anul, vdet[0].funval, vdet[0].neg, true);
 						
-						temp1.Src.push_back(valInternal);
-						text = meth.emplace(text, frm, cntprt);
 						npl = countNodes(text, frm);
-						nodes.insert(nodes.begin() + npl, temp1);
+						nodes.insert(nodes.begin() + npl, temp);
+						text = meth.emplace(text, frm, cntprt + 1);
 					}
 					break;
 				case 1:
 					if (vdet[0].funval < 14) {
-						if (temp.Src.at(0) == valValue) {
-							double num = temp.Val.at(0);
+						if (temp.nodes.at(0).Src.at(0) == valValue) {
+							double num = temp.nodes.at(0).Val.at(0);
 							num = trans.calFun(fundet, num);
 							std::string rep = fromNum(num);
 							text = meth.RepText(text, rep, frm, cntprt);
 						}else{
-							temp = combfun(temp, vdet[0].funval, vdet[0].neg, true);
-							text = meth.emplace(text, frm, cntprt);
+							temp = combfun(temp.nodes.at(0), vdet[0].funval, vdet[0].neg, true);
+							
 							npl = countNodes(text, frm);
 							nodes.insert(nodes.begin() + npl, temp);
+							text = meth.emplace(text, frm, cntprt + 1);
 						}
 						
 					}else{
@@ -134,21 +138,25 @@ namespace AndyInt {
 				}
 				break;
 			case typeExtern:
-				temp = combfun(temp, vdet[0].funval - 16, vdet[0].neg, false);
-				text = meth.emplace(text, frm, cntprt);
+				temp = combfun(temp, vdet[0].funval - 16, vdet[0].neg, false);				
 				npl = countNodes(text, frm);
 				nodes.insert(nodes.begin() + npl, temp);
+				text = meth.emplace(text, frm, cntprt + 1);
 				break;
 			case typeNone:
-				if (temp.Src.size() > 0) {
-					if (temp.Src.at(0) == valValue) {
+				if (temp.nodes.size() > 0) {
+					if (temp.nodes.at(0).Src.at(0) == valValue) {
 						double num = temp.Val.at(0);
 						std::string rep = fromNum(num);
 						text = meth.RepText(text, rep, frm, cntprt);
 					}else{
-						text = meth.emplace(text, frm, cntprt);
-						npl = countNodes(text, frm);
-						nodes.insert(nodes.begin() + npl, temp);
+						if (temp.nodes.at(0).nodes.size() > 0) {							
+							npl = countNodes(text, frm);
+							nodes.insert(nodes.begin() + npl, temp.nodes.at(0).nodes.at(0));
+							text = meth.emplace(text, frm, cntprt + 1);
+						}else{
+
+						}
 					}
 				}else{
 					ahand.report(34);
@@ -159,6 +167,7 @@ namespace AndyInt {
 				ahand.report(35);
 				break;
 			}
+			goto resetlbl;
 		}
 		bool accepted = true;
 		bool subacc;
@@ -180,6 +189,8 @@ namespace AndyInt {
 				exprnum = 0;
 				vdet[0].clear();
 				vdet[1].clear();
+				vdet[0].sid = sid;
+				vdet[1].sid = sid;
 				num1 = 0;
 				num2 = 0;
 				isnode1 = false;
@@ -197,6 +208,11 @@ namespace AndyInt {
 				while (cntprt < text.length() + 1) {
 					if (cntprt < text.length()) {
 						pic = text.substr(cntprt, 1);
+						if (cntprt < text.length() - 1) {
+							pic1 = text.substr(cntprt + 1, 1);
+						}else{
+							pic1 = "";
+						}
 					}
 					else {
 						pic = "~";
@@ -246,19 +262,20 @@ namespace AndyInt {
 					}
 					else {
 						if (curtok != opNone) {
-
 							if (curtok == opInvert) {
 								if (vdet[1].type == typeNum) {
 									num2 = vdet[1].getNum();
 									std::string rep;
 									if (vdet[1].Uord) {
 										rep = (num2 != 0) ? "-1" : "0";
-									}else{
+									}
+									else {
 										rep = (num2 != 0) ? "1" : "0";
 									}
 									text = meth.RepText(text, rep, frm, to + 1);
 									goto resetlbl1;
-								}else if (sid == 1) {
+								}
+								else if (sid == 1) {
 									vtype2 = vdet[1].type1;
 									OpNode nod;
 									if (vtype2 == typeNode) {
@@ -274,8 +291,8 @@ namespace AndyInt {
 									else {
 										if (vtype2 == typeNone) ahand.report(6);
 									}
-									
-									
+
+
 									temp.clear();
 									switch (vtype2) {
 									case typeVar:
@@ -297,7 +314,7 @@ namespace AndyInt {
 										break;
 									case typeNode:
 										temp.Uord.push_back(vdet[1].Uord);
-										temp.Src.push_back(valNode);										
+										temp.Src.push_back(valNode);
 										temp.nodes.push_back(nod);
 										temp.oper = opInvert;
 										nodes.at(nodref) = temp;
@@ -306,7 +323,8 @@ namespace AndyInt {
 									}
 									goto resetlbl1;
 								}
-							}else{
+							}
+							else {
 								if (vdet[0].type == typeNum && vdet[1].type == typeNum) {
 									num1 = vdet[0].getNum();
 									num2 = vdet[1].getNum();
@@ -425,7 +443,7 @@ namespace AndyInt {
 											}
 											break;
 										}
-										text = meth.emplace(text, frm, to + 1);
+										text = meth.emplace(text, vdet[0].fstpla, to);
 										goto resetlbl1;
 									}
 									else {
@@ -441,25 +459,29 @@ namespace AndyInt {
 									temsym = smp.mathOps.substr(i * 2, 2);
 									if (temsym.substr(1, 1) == " ") temsym = temsym.substr(0, 1);
 									if (temsym.length() == 1) {
-										if (temsym == pic) {
-											curtok = smp.convertedTokens[pic];
-											if (curtok == opInvert) ufnd = cntprt;
+										if (temsym == pic) {										
+											
+											if (pic1 == " ") {
+												curtok = smp.convertedTokens[pic];
+												if (curtok == opInvert) ufnd = cntprt;
+											}
 										}
 									}
 									else {
-										if (cntprt > 0) {
-											std::string pic1 = "";
-											if (cntprt < text.length() - 1) pic1 = text.substr(cntprt + 1, 1);
-											if (pic1 + pic == temsym) {
+										if (cntprt > 0) {											
+											
+											if (pic + pic1 == temsym) {
 												curtok = smp.convertedTokens[pic + pic1];
-												cntprt++;
+												
 											}
 										}
 									}
 								}
 							}
+							
+							if (pic1 != " ") cntprt++;
 							nfset1 = true;
-							if (exprnum == 1 && curtok == opNone) {
+							if (exprnum == 1) {
 								frm = frm1;
 								isnode1 = isnode2;
 								isnode2 = false;
@@ -532,7 +554,7 @@ namespace AndyInt {
 					ret.nodes.push_back(tpart);
 					tpart.clear();
 					vdet[0].clear();
-
+					
 				}
 
 
@@ -560,6 +582,7 @@ namespace AndyInt {
 			return ret;
 		}
 		else {
+			ret.Src.push_back(valNode);
 			for (int i = 0; i < text.length(); i++) {
 				pic = text.substr(i, 1);
 				ipic = meth.asc(pic);
@@ -578,7 +601,8 @@ namespace AndyInt {
 				temp.Src.push_back(valVar);
 				temp.Var.push_back(vdet[0].getVal());
 			}
-			return temp;
+			ret.nodes.push_back(temp);
+			return ret;
 		}
 	}
 
@@ -613,7 +637,7 @@ namespace AndyInt {
 	{
 		int cnt = -1;
 
-		for (int i = 0; i < index - 1; i++) if (text.substr(i, 1) == "#") cnt++;
+		for (int i = 0; i < index; i++) if (text.substr(i, 1) == "#") cnt++;
 		if (cnt < 0) cnt = 0;
 		return cnt;
 
@@ -835,6 +859,7 @@ namespace AndyInt {
 		ret.Src.push_back(nod.Src.at(0));
 		ret.Val.push_back(num);
 		ret.nodes.push_back(nod.nodes.at(0));
+		ret.oper = token;
 		return ret;
 	}
 
@@ -845,6 +870,7 @@ namespace AndyInt {
 		ret.Src.push_back(valValue);
 		ret.Val.push_back(num);
 		ret.nodes.push_back(nod.nodes.at(0));
+		ret.oper = token;
 		return ret;
 	}
 
@@ -856,6 +882,7 @@ namespace AndyInt {
 		ret.Var.push_back(var);
 		ret.Var.push_back(nod.Var.at(0));
 		ret.nodes.push_back(nod.nodes.at(0));
+		ret.oper = token;
 		return ret;
 	}
 
@@ -867,6 +894,7 @@ namespace AndyInt {
 		ret.Var.push_back(nod.Var.at(0));
 		ret.Var.push_back(var);
 		ret.nodes.push_back(nod.nodes.at(0));
+		ret.oper = token;
 		return ret;
 	}
 
@@ -880,6 +908,7 @@ namespace AndyInt {
 		ret.Var.push_back(nod1.Var.at(0));
 		ret.nodes.push_back(nod1.nodes.at(0));
 		ret.nodes.push_back(nod2);
+		ret.oper = token;
 		return ret;
 	}
 
@@ -891,6 +920,7 @@ namespace AndyInt {
 		ret.Var.push_back(nod2.Var.at(0));
 		ret.nodes.push_back(nod1);
 		ret.nodes.push_back(nod2.nodes.at(0));
+		ret.oper = token;
 		return ret;
 	}
 
@@ -903,6 +933,7 @@ namespace AndyInt {
 		ret.Var.push_back(nod2.Var.at(0));
 		ret.nodes.push_back(nod1.nodes.at(0));
 		ret.nodes.push_back(nod2.nodes.at(0));
+		ret.oper = token;
 		return ret;
 	}
 
@@ -914,6 +945,7 @@ namespace AndyInt {
 		ret.Var.push_back(nod.Var.at(0));
 		ret.Val.push_back(num);
 		ret.nodes.push_back(nod.nodes.at(0));
+		ret.oper = token;
 		return ret;
 	}
 }

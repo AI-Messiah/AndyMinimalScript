@@ -3,7 +3,7 @@
 #include "TreeMaker.h"
 #include "ResCheck.h"
 #include <mutex>
-
+#include <fstream>
 enum charType {
 	noChar,
 	textChar,

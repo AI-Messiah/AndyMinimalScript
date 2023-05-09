@@ -31,10 +31,12 @@ namespace AndyInt {
 		bool node = false;
 		bool Uord = false;
 		int funval = -1;
+		int fstpla = 0;
+		int sid = 0;
 	private:
 		void hantext(std::string aprt);
 		void haniden();
-		void changType();
+		void changType();		
 		bool hasiden = false;
 		bool hasspa = false;
 		bool decimal = false;

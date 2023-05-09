@@ -29,6 +29,7 @@ namespace AndyInt {
                 else {
                     neg = true;
                 }
+                if (fstpla < 0) fstpla = pla;
                 haniden();
                 return true;
             }
@@ -39,6 +40,7 @@ namespace AndyInt {
         else if ((ipic > 64 && ipic < 91) || (ipic > 96 && ipic < 123)) {
             if (pic == "e") {
                 if ((iaft > 64 && iaft < 91) || (iaft > 96 && iaft < 123) || (ibef > 64 && ibef < 91) || (ibef > 96 && ibef < 123)) {
+                    if (fstpla < 0) fstpla = pla;
                     hantext(pic);
                     return true;
                 }
@@ -47,6 +49,7 @@ namespace AndyInt {
                         hase = true;
                         changType();
                         haniden();
+                        if (fstpla < 0) fstpla = pla;
                         return true;
                     }
                     else {
@@ -55,6 +58,7 @@ namespace AndyInt {
                 }
             }
             else {
+                if (fstpla < 0) fstpla = pla;
                 hantext(pic);
                 return true;
             }
@@ -67,6 +71,7 @@ namespace AndyInt {
                 changType();
                 haniden();
                 decimal = true;
+                if (fstpla < 0) fstpla = pla;
                 return true;
             }
             else {
@@ -85,6 +90,7 @@ namespace AndyInt {
                         val += ipic - 48;
                     }
                 }
+                if (fstpla < 0) fstpla = pla;
                 changType();
                 haniden();
                 return true;
@@ -94,17 +100,19 @@ namespace AndyInt {
             type = typeNode;
             changType();
             haniden();
+            if (fstpla < 0) fstpla = pla;
             return true;
         }
-        else if (pic == "!" && neg) {
-            Uord = true;
+        else if (pic == "!" && neg) {            
+            Uord = true;            
         }
-        
+
         return false;
     }
 
     void VarDetect::clear()
     {
+        fstpla = -1;
         varnam = "";
         neg = false;
         decimal = false;
@@ -117,7 +125,6 @@ namespace AndyInt {
         node = false;
         hasiden = false;
         hasspa = false;
-        Uord = false;
         type = typeNone;
         type1 == typeNone;
     }
@@ -143,7 +150,7 @@ namespace AndyInt {
         }
         return ret;
     }
-
+    
     void VarDetect::hantext(std::string aprt)
     {
         varnam += aprt;
@@ -167,7 +174,7 @@ namespace AndyInt {
 
     void VarDetect::haniden()
     {
-        if (hasspa) ahand.report(25);
+        if (hasspa && sid == 1) ahand.report(25);
         hasiden = true;
     }
     void VarDetect::changType()
