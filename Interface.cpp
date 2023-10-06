@@ -21,10 +21,7 @@ void Interface::shutdown()
 	proc.shutDown();
 }
 
-AndyInt::OpNode Interface::debugTree(std::string text)
-{
-	return proc.maker.createTree(text);
-}
+
 
 
 
