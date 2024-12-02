@@ -14,7 +14,7 @@ I thought I would include a main file and a script. These are easy to delete whe
 These are it's reserved words.
 
 *def – necessary for variable creation. Variables are only assigned by numbers once created.
- *while
+*while
 *if
 *else
 *goto
@@ -49,15 +49,15 @@ The internal functions are
 *sinh - Hyperbolic sine.
 *tan - Tangent
 *tanh - Hyperbolic tangent.
-*distrand – Distributed random number, takes no arguments.
-*secrand – Hardware generated random number, takes no arguments.
+*distrand – Distributed random number, This is supposed to return numbers that are evenly distributed. takes no arguments.
+*secrand – Hardware generated random number, This returns whatever the microprocessor returns. This is suposed to be the most secure method. takes no arguments. these both return a number between 0 <= x < 1
 
-This file contains characters that have been mistaken for formatting.
+This file contains characters that have been mistaken for formatting when displayed in Github. Please read this as a text file.
 
 The order of operations are.
 () - parentheses.
 ^ - exponents.
-* / \ - multiply, devide, float modular.
+* / \ - multiply, divide, float modular.
 + - - add, subtract.
 & - bit and – limited to 64 bit unsigned integers.
 | - bit or – limited to 64 bit unsigned integers.
@@ -66,13 +66,13 @@ The order of operations are.
 && logical and.
 || logical or.
 
-*= /= \= += -= = assignment operators multiply, devide, float modular, add, subtract, direct all of these must be done with variables.
+*= /= \= += -= = assignment operators multiply, divide, float modular, add, subtract, direct all of these must be done with variables.
 
 While, if and else statements use brackets { }
 
-labels have a colin after them.
+labels have a colon after them.
 
-Remarks are indicated by a pound sign which is eaten before lines are processed otherwise it would cause an error, becuase the pound sign indicates nodes.
+Remarks are indicated by a pound sign which is eaten before lines are processed otherwise it would cause an error, because the pound sign indicates nodes.
 
 External functions can have zero or more than one argument. These are seperated by commas 
 
@@ -80,8 +80,14 @@ To use this language you need C++ version 20
 
 include the file Interface.h and create an instance of the Interface class. To set an error handler you create a method for it that takes a vector of errInfo and returns void and pass the address to setErrorHandler. To create an external function you create a function which takes a vector of double and returns a double and pass its internal name and it's address to setFunction.
 
+errInfo is a struct that contains 4 values:
+int errType - this is the number associated with the type of error as defined in this system.
+int errLine - the line number that the error was thrown from (this is not the actual line in the code that entered into the system because the lines are restructured)
+string errMes - this contains some text to describe the error.
+string lineText - this contains the text from the line that the error occured so you know what line it came from.
+
 To run the script pass it as a string to handleScript.   
 
-There is an external shutdown method if you want to run this inside a thread. This already has a mutex in it.
+There is an external shutdown method if you want to run this system inside a thread. This already has a mutex in it.
 
 This Operation restructures the lines so that brackets have their own line.
